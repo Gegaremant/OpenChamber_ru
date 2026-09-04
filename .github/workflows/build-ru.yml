@@ -43,6 +43,10 @@ jobs:
           if [[ -n "${{ github.event.inputs.version }}" ]]; then
             echo "new_version=${{ github.event.inputs.version }}" >> "$GITHUB_OUTPUT"
             echo "should_build=true" >> "$GITHUB_OUTPUT"
+          elif [[ "${{ github.ref_type }}" == "tag" ]]; then
+            TAG_VERSION=$(echo "${{ github.ref_name }}" | sed 's/^v//')
+            echo "new_version=$TAG_VERSION" >> "$GITHUB_OUTPUT"
+            echo "should_build=true" >> "$GITHUB_OUTPUT"
           else
             UPSTREAM_VERSION=$(curl -s https://api.github.com/repos/openchamber/openchamber/releases/latest | jq -r '.tag_name' | sed 's/^v//')
             CURRENT_TAG=$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//' || echo "0.0.0")
