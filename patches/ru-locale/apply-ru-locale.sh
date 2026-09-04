@@ -50,9 +50,9 @@ echo "  ✓ ru.settings.ts скопирован"
 echo ""
 echo "[2/5] Модифицируем runtime.ts..."
 
-sed -i "s/export type Locale = 'en' | 'de' | 'fr' | 'zh-CN' | 'zh-TW' | 'uk' | 'es'/export type Locale = 'en' | 'de' | 'fr' | 'zh-CN' | 'zh-TW' | 'uk' | 'ru' | 'es'/" packages/ui/src/lib/i18n/runtime.ts
-sed -i "s/\['en', 'de', 'fr', 'zh-CN', 'zh-TW', 'uk', 'es'/['en', 'de', 'fr', 'zh-CN', 'zh-TW', 'uk', 'ru', 'es'/" packages/ui/src/lib/i18n/runtime.ts
-sed -i "s/'common.language.ukrainian' | 'common.language.spanish'/'common.language.ukrainian' | 'common.language.russian' | 'common.language.spanish'/" packages/ui/src/lib/i18n/runtime.ts
+perl -0pi -e "s/export type Locale = 'en' \| 'de' \| 'fr' \| 'zh-CN' \| 'zh-TW' \| 'uk' \| 'es'/export type Locale = 'en' \| 'de' \| 'fr' \| 'zh-CN' \| 'zh-TW' \| 'uk' \| 'ru' \| 'es'/" packages/ui/src/lib/i18n/runtime.ts
+perl -0pi -e "s/\['en', 'de', 'fr', 'zh-CN', 'zh-TW', 'uk', 'es'/['en', 'de', 'fr', 'zh-CN', 'zh-TW', 'uk', 'ru', 'es'/" packages/ui/src/lib/i18n/runtime.ts
+perl -0pi -e "s/'common\.language\.ukrainian' \| 'common\.language\.spanish'/'common.language.ukrainian' \| 'common.language.russian' \| 'common.language.spanish'/" packages/ui/src/lib/i18n/runtime.ts
 perl -0pi -e "s/(uk: 'common\.language\.ukrainian',)/\$1\n  ru: 'common.language.russian',/" packages/ui/src/lib/i18n/runtime.ts
 perl -0pi -e "s/return 'uk';/return 'uk';\n  }\n  if (normalized === 'ru' || normalized.startsWith('ru-') || normalized === 'be' || normalized.startsWith('be-')) {\n    return 'ru';/s" packages/ui/src/lib/i18n/runtime.ts
 
