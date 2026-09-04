@@ -52,9 +52,8 @@ build/
 builder-debug.yml
 latest-*.yml
 
-# One-off translation / fix scripts
+# One-off translation scripts
 translate_*.py
-fix-deprecation.js
 build-windows.ps1
 
 # Built webview assets (generated during build)
