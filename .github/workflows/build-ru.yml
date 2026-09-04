@@ -1,11 +1,11 @@
-name: Build OpenChamber RU
+name: Build OpenChamber_ru
 
 on:
   push:
     tags:
       - 'v*'
   schedule:
-    - cron: '0 12 * * *'  # Проверка раз в день в 12:00 UTC
+    - cron: '0 12 * * *'
   workflow_dispatch:
     inputs:
       version:
@@ -43,22 +43,15 @@ jobs:
           if [[ -n "${{ github.event.inputs.version }}" ]]; then
             echo "new_version=${{ github.event.inputs.version }}" >> "$GITHUB_OUTPUT"
             echo "should_build=true" >> "$GITHUB_OUTPUT"
-            echo "Используем указанную версию: ${{ github.event.inputs.version }}"
           else
-            # Получаем последний релиз оригинального репозитория
             UPSTREAM_VERSION=$(curl -s https://api.github.com/repos/openchamber/openchamber/releases/latest | jq -r '.tag_name' | sed 's/^v//')
             CURRENT_TAG=$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//' || echo "0.0.0")
-            
-            echo "Оригинальная версия: $UPSTREAM_VERSION"
-            echo "Текущая версия: $CURRENT_TAG"
-            
+
             if [ "$UPSTREAM_VERSION" != "$CURRENT_TAG" ] && [ "$UPSTREAM_VERSION" != "null" ]; then
               echo "new_version=$UPSTREAM_VERSION" >> "$GITHUB_OUTPUT"
               echo "should_build=true" >> "$GITHUB_OUTPUT"
-              echo "Новая версия доступна!"
             else
               echo "should_build=false" >> "$GITHUB_OUTPUT"
-              echo "Обновлений нет"
             fi
           fi
 
@@ -77,7 +70,7 @@ jobs:
           tag_name: v${{ needs.check-upstream.outputs.new_version }}
           draft: true
           generate_release_notes: true
-          name: OpenChamber RU v${{ needs.check-upstream.outputs.new_version }}
+          name: OpenChamber_ru v${{ needs.check-upstream.outputs.new_version }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -92,12 +85,12 @@ jobs:
           git clone --depth 1 --branch "v${{ needs.create-release.outputs.version }}" ${{ env.ORIGINAL_REPO }} build-source || \
           git clone --depth 1 ${{ env.ORIGINAL_REPO }} build-source
 
-      - name: Apply Russian locale patch
+      - name: Apply Russian locale
         run: |
           cd build-source
-          patch -p1 --forward < ../patches/ru-locale/ru-locale.patch || true
           cp ../patches/ru-locale/ru.ts packages/ui/src/lib/i18n/messages/ru.ts
           cp ../patches/ru-locale/ru.settings.ts packages/ui/src/lib/i18n/messages/ru.settings.ts
+          bash ../patches/ru-locale/apply-ru-locale.sh "${{ needs.create-release.outputs.version }}" .
 
       - name: Setup bun
         uses: oven-sh/setup-bun@v2
@@ -149,12 +142,12 @@ jobs:
           git clone --depth 1 --branch "v${{ needs.create-release.outputs.version }}" ${{ env.ORIGINAL_REPO }} build-source || \
           git clone --depth 1 ${{ env.ORIGINAL_REPO }} build-source
 
-      - name: Apply Russian locale patch
+      - name: Apply Russian locale
         run: |
           cd build-source
-          patch -p1 --forward < ../patches/ru-locale/ru-locale.patch || true
           cp ../patches/ru-locale/ru.ts packages/ui/src/lib/i18n/messages/ru.ts
           cp ../patches/ru-locale/ru.settings.ts packages/ui/src/lib/i18n/messages/ru.settings.ts
+          bash ../patches/ru-locale/apply-ru-locale.sh "${{ needs.create-release.outputs.version }}" .
 
       - name: Install wine
         run: |
@@ -197,7 +190,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ needs.create-release.outputs.version }}
-          files: build-source/packages/electron/dist/OpenChamber-*.exe
+          files: build-source/packages/electron/dist/OpenChamber-*-win-x64.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -212,12 +205,12 @@ jobs:
           git clone --depth 1 --branch "v${{ needs.create-release.outputs.version }}" ${{ env.ORIGINAL_REPO }} build-source || \
           git clone --depth 1 ${{ env.ORIGINAL_REPO }} build-source
 
-      - name: Apply Russian locale patch
+      - name: Apply Russian locale
         run: |
           cd build-source
-          patch -p1 --forward < ../patches/ru-locale/ru-locale.patch || true
           cp ../patches/ru-locale/ru.ts packages/ui/src/lib/i18n/messages/ru.ts
           cp ../patches/ru-locale/ru.settings.ts packages/ui/src/lib/i18n/messages/ru.settings.ts
+          bash ../patches/ru-locale/apply-ru-locale.sh "${{ needs.create-release.outputs.version }}" .
 
       - name: Setup bun
         uses: oven-sh/setup-bun@v2
@@ -259,8 +252,8 @@ jobs:
         with:
           tag_name: v${{ needs.create-release.outputs.version }}
           files: |
-            build-source/packages/electron/dist/OpenChamber-*.dmg
-            build-source/packages/electron/dist/OpenChamber-*.zip
+            build-source/packages/electron/dist/OpenChamber-*-mac-x64.dmg
+            build-source/packages/electron/dist/OpenChamber-*-mac-x64.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -275,12 +268,12 @@ jobs:
           git clone --depth 1 --branch "v${{ needs.create-release.outputs.version }}" ${{ env.ORIGINAL_REPO }} build-source || \
           git clone --depth 1 ${{ env.ORIGINAL_REPO }} build-source
 
-      - name: Apply Russian locale patch
+      - name: Apply Russian locale
         run: |
           cd build-source
-          patch -p1 --forward < ../patches/ru-locale/ru-locale.patch || true
           cp ../patches/ru-locale/ru.ts packages/ui/src/lib/i18n/messages/ru.ts
           cp ../patches/ru-locale/ru.settings.ts packages/ui/src/lib/i18n/messages/ru.settings.ts
+          bash ../patches/ru-locale/apply-ru-locale.sh "${{ needs.create-release.outputs.version }}" .
 
       - name: Setup bun
         uses: oven-sh/setup-bun@v2
@@ -311,11 +304,17 @@ jobs:
           ANDROID_HOME: ${{ env.ANDROID_HOME }}
         run: bun run build:android:debug
 
+      - name: Rename APK
+        run: |
+          VERSION="${{ needs.create-release.outputs.version }}"
+          cp build-source/packages/mobile/android/app/build/outputs/apk/debug/app-debug.apk \
+             "OpenChamber_ru-${VERSION}-android.apk"
+
       - name: Upload APK to release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ needs.create-release.outputs.version }}
-          files: build-source/packages/mobile/android/app/build/outputs/apk/debug/app-debug.apk
+          files: OpenChamber_ru-*-android.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

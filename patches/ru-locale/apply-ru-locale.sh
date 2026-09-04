@@ -3,9 +3,13 @@ set -euo pipefail
 
 # ============================================================
 # OpenChamber RU — скрипт добавления русской локали
-# Клонирует оригинальный OpenChamber и добавляет русский язык
-# Использование: ./apply-ru-locale.sh [version]
-#   version — тег релиза (например 1.22.0) или опустите для main
+#
+# Режим 1 (standalone): ./apply-ru-locale.sh [version] [build_dir]
+#   Клонирует оригинальный OpenChamber и добавляет русский язык
+#
+# Режим 2 (in-workflow): apply-ru-locale.sh <version> <existing_dir>
+#   Если <existing_dir> существует и является git-репозиторием,
+#   клонирование пропускается.
 # ============================================================
 
 VERSION="${1:-main}"
@@ -15,11 +19,10 @@ BUILD_DIR="${2:-/tmp/openchamber-ru-build}"
 
 echo "=== OpenChamber RU — добавление русской локали ==="
 echo "Версия: $VERSION"
-echo "Директория сборки: $BUILD_DIR"
 
-# --- Клонируем ---
+# --- Клонируем (только если директория не существует) ---
 if [ -d "$BUILD_DIR/.git" ]; then
-    echo "Директория уже существует и является git-репозиторием, пропускаем клонирование."
+    echo "Готовая директория: $BUILD_DIR"
 else
     rm -rf "$BUILD_DIR"
     echo "Клонируем оригинальный OpenChamber..."
@@ -47,19 +50,10 @@ echo "  ✓ ru.settings.ts скопирован"
 echo ""
 echo "[2/5] Модифицируем runtime.ts..."
 
-# Заменяем тип Locale — добавляем 'ru' после 'uk'
 sed -i "s/export type Locale = 'en' | 'de' | 'fr' | 'zh-CN' | 'zh-TW' | 'uk' | 'es'/export type Locale = 'en' | 'de' | 'fr' | 'zh-CN' | 'zh-TW' | 'uk' | 'ru' | 'es'/" packages/ui/src/lib/i18n/runtime.ts
-
-# Заменяем массив LOCALES — добавляем 'ru' после 'uk'
 sed -i "s/\['en', 'de', 'fr', 'zh-CN', 'zh-TW', 'uk', 'es'/['en', 'de', 'fr', 'zh-CN', 'zh-TW', 'uk', 'ru', 'es'/" packages/ui/src/lib/i18n/runtime.ts
-
-# Добавляем 'common.language.russian' в тип LOCALE_LABEL_KEYS
 sed -i "s/'common.language.ukrainian' | 'common.language.spanish'/'common.language.ukrainian' | 'common.language.russian' | 'common.language.spanish'/" packages/ui/src/lib/i18n/runtime.ts
-
-# Добавляем ru: 'common.language.russian' после uk в LOCALE_LABEL_KEYS
 sed -i "/uk: 'common.language.ukrainian',/a\\  ru: 'common.language.russian'," packages/ui/src/lib/i18n/runtime.ts
-
-# Добавляем нормализацию ru/be после uk блока
 sed -i "/return 'uk';/a\\  }\\n  if (normalized === 'ru' || normalized.startsWith('ru-') || normalized === 'be' || normalized.startsWith('be-')) {\\n    return 'ru';" packages/ui/src/lib/i18n/runtime.ts
 
 echo "  ✓ runtime.ts обновлён"
@@ -70,7 +64,6 @@ echo "  ✓ runtime.ts обновлён"
 echo ""
 echo "[3/5] Модифицируем store.ts..."
 
-# Добавляем ветку для ru после uk
 sed -i "/locale === 'uk'/,/\? await import('.\/messages\/uk')/{
   /? await import('.\/messages\/uk')/a\\
             : locale === 'ru'\\
@@ -90,40 +83,15 @@ sed -i "/uk: 'uk-UA',/a\\  ru: 'ru-RU'," packages/ui/src/lib/i18n/intl.ts
 echo "  ✓ intl.ts обновлён"
 
 # ============================================================
-# 5. bootstrap.ts — добавляем RU_MESSAGES
+# 5. bootstrap.ts — добавляем RU_MESSAGES (через node.js)
 # ============================================================
 echo ""
 echo "[5/5] Модифицируем bootstrap.ts..."
 
-# Вставляем блок RU_MESSAGES после UK_MESSAGES
-cat >> /tmp/ru_messages_block.txt << 'RUMESSAGES'
-
-const RU_MESSAGES: BootstrapMessages = {
-  startingApi: 'Запуск OpenCode API…',
-  initializing: 'Инициализация…',
-  connecting: 'Подключение…',
-  connected: 'Подключено!',
-  connectionError: 'Ошибка подключения',
-  disconnected: 'Отключено',
-  reconnecting: 'Повторное подключение…',
-  initialDataLoadFailed: 'OpenCode подключён, но не удалось выполнить начальную загрузку данных.',
-  cliNotFound: 'OpenCode CLI не найден. Сначала установите его.',
-  providersReady: '✓ Провайдеры',
-  providersLoading: '… Провайдеры',
-  agentsReady: '✓ Агенты',
-  agentsLoading: '… Агенты',
-  startingDevServer: (hostLabel) => `Запуск dev-сервера webview (${hostLabel})...`,
-  waitingDevServer: (hostLabel, attempt) => `Ожидание dev-сервера webview (${hostLabel})... попытка ${attempt}`,
-  loadingData: (providersText, agentsText) => `Загрузка данных (${providersText}, ${agentsText})…`,
-};
-RUMESSAGES
-
-# Используем node.js для надёжной вставки RU_MESSAGES в bootstrap.ts
 node -e "
   const fs = require('fs');
   let content = fs.readFileSync('packages/ui/src/lib/i18n/bootstrap.ts', 'utf8');
 
-  // Вставляем RU_MESSAGES перед ES_MESSAGES
   const ruBlock = \`
 const RU_MESSAGES: BootstrapMessages = {
   startingApi: 'Запуск OpenCode API…',
@@ -146,14 +114,11 @@ const RU_MESSAGES: BootstrapMessages = {
 
 \`;
 
-  // Вставляем перед const ES_MESSAGES
   content = content.replace(/const ES_MESSAGES:/, ruBlock + 'const ES_MESSAGES:');
-
-  // Добавляем ru: RU_MESSAGES в BOOTSTRAP_MESSAGES
   content = content.replace(/uk: UK_MESSAGES,/, 'uk: UK_MESSAGES,\\n  ru: RU_MESSAGES,');
 
   fs.writeFileSync('packages/ui/src/lib/i18n/bootstrap.ts', content);
-  console.log('  ✓ bootstrap.ts обновлён через node.js');
+  console.log('  ✓ bootstrap.ts обновлён');
 "
 
 # ============================================================
@@ -162,7 +127,6 @@ const RU_MESSAGES: BootstrapMessages = {
 echo ""
 echo "[бонус] Добавляем 'common.language.russian' во все локали..."
 
-# Список файлов и их переводов "Russian"
 declare -A RUSSIAN_NAMES=(
   ["en.ts"]="'common.language.russian': 'Russian',"
   ["de.ts"]="'common.language.russian': 'Russisch',"
@@ -181,7 +145,6 @@ declare -A RUSSIAN_NAMES=(
 for file in "${!RUSSIAN_NAMES[@]}"; do
   filepath="packages/ui/src/lib/i18n/messages/$file"
   if [ -f "$filepath" ]; then
-    # Добавляем строку после common.language.turkish
     line="${RUSSIAN_NAMES[$file]}"
     sed -i "/common.language.turkish/a\\
 $line" "$filepath"
@@ -207,9 +170,6 @@ fi
 echo ""
 echo "[бонус] Добавляем ru блоки в интеграционные i18n файлы..."
 
-# Для каждого интеграционного файла добавляем ru: { ... } блок перед uk:
-# (Используем node.js для надёжной вставки)
-
 INTEGRATION_FILES=(
   "packages/ui/src/lib/i18n/messages/linear-integration.i18n.ts"
   "packages/ui/src/lib/i18n/messages/linear-issue-picker.i18n.ts"
@@ -217,38 +177,43 @@ INTEGRATION_FILES=(
   "packages/ui/src/lib/i18n/messages/third-party-integrations.i18n.ts"
 )
 
-# Копируем готовые ru-блоки из оригинального билда
-ORIGINAL_RU_BUILD="${SCRIPT_DIR}/../../packages/ui/src/lib/i18n/messages"
+# Ищем оригинальные файлы с ru блоками — сначала в локальном репо, потом в openchamber-main
+ORIG_CANDIDATES=(
+  "${SCRIPT_DIR}/../../openchamber-main/openchamber-main/packages/ui/src/lib/i18n/messages"
+  "${SCRIPT_DIR}/../../packages/ui/src/lib/i18n/messages"
+)
 
 for intfile in "${INTEGRATION_FILES[@]}"; do
   if [ -f "$intfile" ]; then
     filename=$(basename "$intfile")
-    orig_file="$ORIGINAL_RU_BUILD/$filename"
-    
-    # Проверяем есть ли ru блок в оригинальном файле
-    if [ -f "$orig_file" ] && grep -q "ru:" "$orig_file"; then
-      # Извлекаем ru блок из оригинального файла
-      node -e "
-        const fs = require('fs');
-        const content = fs.readFileSync('$orig_file', 'utf8');
-        const match = content.match(/(\s*ru:\s*\{[\s\S]*?\n  \},)\n/);
-        if (match) {
-          const ruBlock = match[1];
-          let target = fs.readFileSync('$intfile', 'utf8');
-          // Вставляем ru блок перед uk:
-          if (!target.includes('ru:')) {
-            target = target.replace(/(\n\s*uk:\s*\{)/, '\n' + ruBlock + '\$1');
-            fs.writeFileSync('$intfile', target);
-            console.log('  ✓ ' + '$filename' + ' (ru блок добавлен)');
+    found=false
+    for orig_dir in "${ORIG_CANDIDATES[@]}"; do
+      orig_file="$orig_dir/$filename"
+      if [ -f "$orig_file" ] && grep -q "ru:" "$orig_file"; then
+        node -e "
+          const fs = require('fs');
+          const content = fs.readFileSync('$orig_file', 'utf8');
+          const match = content.match(/(\s*ru:\s*\{[\s\S]*?\n  \},)\n/);
+          if (match) {
+            const ruBlock = match[1];
+            let target = fs.readFileSync('$intfile', 'utf8');
+            if (!target.includes('ru:')) {
+              target = target.replace(/(\n\s*uk:\s*\{)/, '\n' + ruBlock + '\$1');
+              fs.writeFileSync('$intfile', target);
+              console.log('  ✓ ' + '$filename');
+            } else {
+              console.log('  → ' + '$filename' + ' (уже есть)');
+            }
           } else {
-            console.log('  → ' + '$filename' + ' (ru блок уже есть)');
+            console.log('  ⚠ ' + '$filename' + ' (ru блок не найден)');
           }
-        } else {
-          console.log('  ⚠ ' + '$filename' + ' (ru блок не найден в оригинале)');
-        }
-      " 2>/dev/null || echo "  ⚠ $filename (ошибка при вставке ru блока)"
-    else
-      echo "  → $filename (пропущен — нет ru блока в оригинале)"
+        " 2>/dev/null || echo "  ⚠ $filename (ошибка)"
+        found=true
+        break
+      fi
+    done
+    if [ "$found" = false ]; then
+      echo "  → $filename (пропущен)"
     fi
   fi
 done
@@ -260,23 +225,3 @@ echo ""
 echo "============================================="
 echo "=== РУССКАЯ ЛОКАЛЬ УСПЕШНО ДОБАВЛЕНА! ==="
 echo "============================================="
-echo ""
-echo "Директория: $BUILD_DIR"
-echo ""
-echo "Для сборки выполните:"
-echo "  cd $BUILD_DIR"
-echo "  bun install"
-echo ""
-echo "Linux AppImage:"
-echo "  cd packages/electron"
-echo "  bun run build:web-assets && bun run prepare:opencode-cli && bun run bundle:main && bun run rebuild:native"
-echo "  bunx electron-builder --linux --x64 --publish=never"
-echo ""
-echo "Windows (из Linux, нужен wine):"
-echo "  bunx electron-builder --win nsis --x64 --publish=never"
-echo ""
-echo "macOS:"
-echo "  bunx electron-builder --mac --x64 --publish=never"
-echo ""
-echo "Android:"
-echo "  cd ../mobile && bun run build:android:debug"
