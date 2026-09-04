@@ -177,43 +177,16 @@ INTEGRATION_FILES=(
   "packages/ui/src/lib/i18n/messages/third-party-integrations.i18n.ts"
 )
 
-# Ищем оригинальные файлы с ru блоками — сначала в локальном репо, потом в openchamber-main
-ORIG_CANDIDATES=(
-  "${SCRIPT_DIR}/../../openchamber-main/openchamber-main/packages/ui/src/lib/i18n/messages"
-  "${SCRIPT_DIR}/../../packages/ui/src/lib/i18n/messages"
-)
-
+# Полные версии интеграционных файлов с ru блоками лежат в patches/ru-locale
 for intfile in "${INTEGRATION_FILES[@]}"; do
   if [ -f "$intfile" ]; then
     filename=$(basename "$intfile")
-    found=false
-    for orig_dir in "${ORIG_CANDIDATES[@]}"; do
-      orig_file="$orig_dir/$filename"
-      if [ -f "$orig_file" ] && grep -q "ru:" "$orig_file"; then
-        node -e "
-          const fs = require('fs');
-          const content = fs.readFileSync('$orig_file', 'utf8');
-          const match = content.match(/(\s*ru:\s*\{[\s\S]*?\n  \},)\n/);
-          if (match) {
-            const ruBlock = match[1];
-            let target = fs.readFileSync('$intfile', 'utf8');
-            if (!target.includes('ru:')) {
-              target = target.replace(/(\n\s*uk:\s*\{)/, '\n' + ruBlock + '\$1');
-              fs.writeFileSync('$intfile', target);
-              console.log('  ✓ ' + '$filename');
-            } else {
-              console.log('  → ' + '$filename' + ' (уже есть)');
-            }
-          } else {
-            console.log('  ⚠ ' + '$filename' + ' (ru блок не найден)');
-          }
-        " 2>/dev/null || echo "  ⚠ $filename (ошибка)"
-        found=true
-        break
-      fi
-    done
-    if [ "$found" = false ]; then
-      echo "  → $filename (пропущен)"
+    patched_file="$SCRIPT_DIR/$filename"
+    if [ -f "$patched_file" ] && grep -q "ru:" "$patched_file"; then
+      cp "$patched_file" "$intfile"
+      echo "  ✓ $filename (полная версия с ru блоком)"
+    else
+      echo "  → $filename (патч не найден)"
     fi
   fi
 done
