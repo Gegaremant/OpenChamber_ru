@@ -53,7 +53,7 @@ echo "[2/5] Модифицируем runtime.ts..."
 sed -i "s/export type Locale = 'en' | 'de' | 'fr' | 'zh-CN' | 'zh-TW' | 'uk' | 'es'/export type Locale = 'en' | 'de' | 'fr' | 'zh-CN' | 'zh-TW' | 'uk' | 'ru' | 'es'/" packages/ui/src/lib/i18n/runtime.ts
 sed -i "s/\['en', 'de', 'fr', 'zh-CN', 'zh-TW', 'uk', 'es'/['en', 'de', 'fr', 'zh-CN', 'zh-TW', 'uk', 'ru', 'es'/" packages/ui/src/lib/i18n/runtime.ts
 sed -i "s/'common.language.ukrainian' | 'common.language.spanish'/'common.language.ukrainian' | 'common.language.russian' | 'common.language.spanish'/" packages/ui/src/lib/i18n/runtime.ts
-sed -i "/uk: 'common.language.ukrainian',/a\\  ru: 'common.language.russian'," packages/ui/src/lib/i18n/runtime.ts
+perl -0pi -e "s/(uk: 'common\.language\.ukrainian',)/\$1\n  ru: 'common.language.russian',/" packages/ui/src/lib/i18n/runtime.ts
 perl -0pi -e "s/return 'uk';/return 'uk';\n  }\n  if (normalized === 'ru' || normalized.startsWith('ru-') || normalized === 'be' || normalized.startsWith('be-')) {\n    return 'ru';/s" packages/ui/src/lib/i18n/runtime.ts
 
 echo "  ✓ runtime.ts обновлён"
@@ -74,7 +74,7 @@ echo "  ✓ store.ts обновлён"
 echo ""
 echo "[4/5] Модифицируем intl.ts..."
 
-sed -i "/uk: 'uk-UA',/a\\  ru: 'ru-RU'," packages/ui/src/lib/i18n/intl.ts
+perl -0pi -e "s/(uk: 'uk-UA',)/\$1\n  ru: 'ru-RU',/" packages/ui/src/lib/i18n/intl.ts
 
 echo "  ✓ intl.ts обновлён"
 
@@ -155,7 +155,7 @@ echo "[бонус] Добавляем ru в walkthrough/languages.js..."
 
 LANG_FILE="packages/web/server/lib/walkthrough/languages.js"
 if [ -f "$LANG_FILE" ]; then
-  sed -i "/uk: 'Ukrainian',/a\\  ru: 'Russian'," "$LANG_FILE"
+  perl -0pi -e "s/(uk: 'Ukrainian',)/\$1\n  ru: 'Russian',/" "$LANG_FILE"
   echo "  ✓ languages.js"
 fi
 
