@@ -1,6 +1,9 @@
 name: Build OpenChamber RU
 
 on:
+  push:
+    tags:
+      - 'v*'
   schedule:
     - cron: '0 12 * * *'  # Проверка раз в день в 12:00 UTC
   workflow_dispatch:
