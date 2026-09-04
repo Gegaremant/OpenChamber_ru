@@ -54,7 +54,7 @@ sed -i "s/export type Locale = 'en' | 'de' | 'fr' | 'zh-CN' | 'zh-TW' | 'uk' | '
 sed -i "s/\['en', 'de', 'fr', 'zh-CN', 'zh-TW', 'uk', 'es'/['en', 'de', 'fr', 'zh-CN', 'zh-TW', 'uk', 'ru', 'es'/" packages/ui/src/lib/i18n/runtime.ts
 sed -i "s/'common.language.ukrainian' | 'common.language.spanish'/'common.language.ukrainian' | 'common.language.russian' | 'common.language.spanish'/" packages/ui/src/lib/i18n/runtime.ts
 sed -i "/uk: 'common.language.ukrainian',/a\\  ru: 'common.language.russian'," packages/ui/src/lib/i18n/runtime.ts
-sed -i "/return 'uk';/a\\  }\\n  if (normalized === 'ru' || normalized.startsWith('ru-') || normalized === 'be' || normalized.startsWith('be-')) {\\n    return 'ru';" packages/ui/src/lib/i18n/runtime.ts
+perl -0pi -e "s/return 'uk';/return 'uk';\n  }\n  if (normalized === 'ru' || normalized.startsWith('ru-') || normalized === 'be' || normalized.startsWith('be-')) {\n    return 'ru';/s" packages/ui/src/lib/i18n/runtime.ts
 
 echo "  ✓ runtime.ts обновлён"
 
@@ -64,11 +64,7 @@ echo "  ✓ runtime.ts обновлён"
 echo ""
 echo "[3/5] Модифицируем store.ts..."
 
-sed -i "/locale === 'uk'/,/\? await import('.\/messages\/uk')/{
-  /? await import('.\/messages\/uk')/a\\
-            : locale === 'ru'\\
-              ? await import('./messages/ru') as { dict: I18nDictionary }
-}" packages/ui/src/lib/i18n/store.ts
+perl -0pi -e "s/(\? await import\('\.\/messages\/uk'\) as \{ dict: I18nDictionary \}\n)/\$1            : locale === 'ru'\n              ? await import('.\/messages\/ru') as { dict: I18nDictionary }\n/" packages/ui/src/lib/i18n/store.ts
 
 echo "  ✓ store.ts обновлён"
 
@@ -146,8 +142,7 @@ for file in "${!RUSSIAN_NAMES[@]}"; do
   filepath="packages/ui/src/lib/i18n/messages/$file"
   if [ -f "$filepath" ]; then
     line="${RUSSIAN_NAMES[$file]}"
-    sed -i "/common.language.turkish/a\\
-$line" "$filepath"
+    perl -0pi -e "s/(common\.language\.turkish:.*\n)/\$1$line\n/" "$filepath"
     echo "  ✓ $file"
   fi
 done
