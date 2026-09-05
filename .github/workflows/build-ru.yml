@@ -127,11 +127,17 @@ jobs:
           bun run rebuild:native
           bunx electron-builder --linux --x64 --publish=never
 
+      - name: Rename AppImage to OpenChamber_ru
+        run: |
+          VERSION="${{ needs.create-release.outputs.version }}"
+          appimage=$(find build-source/packages/electron/dist -name 'OpenChamber-*-linux-x86_64.AppImage' | head -1)
+          mv "$appimage" "OpenChamber_ru-${VERSION}-linux-x86_64.AppImage"
+
       - name: Upload AppImage to release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ needs.create-release.outputs.version }}
-          files: build-source/packages/electron/dist/OpenChamber-*.AppImage
+          files: OpenChamber_ru-*-linux-x86_64.AppImage
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -190,11 +196,17 @@ jobs:
           bun run rebuild:native
           bunx electron-builder --win nsis --x64 --publish=never
 
+      - name: Rename Windows installer to OpenChamber_ru
+        run: |
+          VERSION="${{ needs.create-release.outputs.version }}"
+          exe=$(find build-source/packages/electron/dist -name 'OpenChamber-*-win-x64.exe' | head -1)
+          mv "$exe" "OpenChamber_ru-${VERSION}-win-x64.exe"
+
       - name: Upload Windows installer to release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ needs.create-release.outputs.version }}
-          files: build-source/packages/electron/dist/OpenChamber-*-win-x64.exe
+          files: OpenChamber_ru-*-win-x64.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -251,13 +263,21 @@ jobs:
             --config.mac.notarize=false \
             --config.mac.hardenedRuntime=false
 
+      - name: Rename macOS artifacts to OpenChamber_ru
+        run: |
+          VERSION="${{ needs.create-release.outputs.version }}"
+          dmg=$(find build-source/packages/electron/dist -name 'OpenChamber-*-mac-x64.dmg' | head -1)
+          zipf=$(find build-source/packages/electron/dist -name 'OpenChamber-*-mac-x64.zip' | head -1)
+          mv "$dmg" "OpenChamber_ru-${VERSION}-mac-x64.dmg"
+          mv "$zipf" "OpenChamber_ru-${VERSION}-mac-x64.zip"
+
       - name: Upload macOS artifacts to release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ needs.create-release.outputs.version }}
           files: |
-            build-source/packages/electron/dist/OpenChamber-*-mac-x64.dmg
-            build-source/packages/electron/dist/OpenChamber-*-mac-x64.zip
+            OpenChamber_ru-*-mac-x64.dmg
+            OpenChamber_ru-*-mac-x64.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

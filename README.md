@@ -12,12 +12,14 @@
 
 Скачайте последний релиз со страницы [Releases](https://github.com/Gegaremant/OpenChamber_ru/releases/latest):
 
-| Платформа | Формат |
-|-----------|--------|
-| **Linux x86_64** | AppImage |
-| **Windows x64** | NSIS installer |
-| **macOS** | DMG + ZIP |
-| **Android** | APK |
+| Платформа | Файл |
+|-----------|------|
+| **Linux x86_64** | `OpenChamber_ru-<версия>-linux-x86_64.AppImage` |
+| **Windows x64** | `OpenChamber_ru-<версия>-win-x64.exe` |
+| **macOS** | `OpenChamber_ru-<версия>-mac-x64.dmg` / `.zip` |
+| **Android** | `OpenChamber_ru-<версия>-android.apk` |
+
+> Все артефакты именуются единообразно с префиксом `OpenChamber_ru-`.
 
 ## Что это?
 
@@ -32,32 +34,79 @@
 5. Собирает приложения для Linux, Windows, macOS и Android
 6. Публикует релиз с готовыми артефактами
 
-## Как включить русский язык
+## Язык
+
+Русский язык установлен **по умолчанию** — при первом запуске приложение открывается на русском.
+
+Если нужно сменить язык:
 
 1. Откройте OpenChamber
 2. Перейдите в **Settings** (Настройки)
 3. Найдите раздел **Language** (Язык)
-4. Выберите **Русский**
+4. Выберите нужный язык
+
+> Примечание: если на устройстве ранее уже был выбран другой язык, он сохранится.
+> Чтобы вернуть русский по умолчанию — очистите данные приложения или переключите язык в настройках.
 
 ## Быстрый старт
 
-### Desktop — macOS, Windows, Linux
+### Linux (Debian / Ubuntu)
 
-Скачайте нужный файл из [Releases](https://github.com/Gegaremant/OpenChamber_ru/releases/latest) и запустите.
+Самый простой способ — установить через скрипт. Он ставит ярлык в меню приложений,
+иконку и команду `openchamber-ru` для запуска из терминала:
 
-**Linux:**
+```bash
+# 1. Скачайте OpenChamber_ru-<версия>-linux-x86_64.AppImage
+# 2. Из каталога с файлом выполните:
+chmod +x install-linux.sh
+./install-linux.sh
+```
+
+После этого запускайте из меню приложений (ярлык **OpenChamber_ru**) или командой:
+
+```bash
+openchamber-ru
+```
+
+#### Запуск без установки
+
 ```bash
 chmod +x OpenChamber_ru-*.AppImage
 ./OpenChamber_ru-*.AppImage
 ```
 
-**Windows:** Запустите `.exe` файл.
+#### Если приложение не открывается (пустой DISPLAY)
 
-**macOS:** Откройте `.dmg` и перетащите OpenChamber в Applications.
+На серверах и в RDP-сессиях (xrdp) переменная `DISPLAY` / `XAUTHORITY` часто
+не задана. Запустите с явным указанием:
+
+```bash
+export DISPLAY=:10.0                 # укажите ваш дисплей (:0 — локальный рабочий стол)
+export XAUTHORITY="$HOME/.Xauthority"
+./OpenChamber_ru-*.AppImage --no-sandbox
+```
+
+Определить активный дисплей можно так:
+
+```bash
+echo "$DISPLAY"                      # если пусто — найдём вручную
+for d in :0 :10 :11; do DISPLAY=$d xdpyinfo >/dev/null 2>&1 && echo "рабочий дисплей: $d"; done
+```
+
+> Установочный скрипт `install-linux.sh` автоматически определяет корректные
+> `DISPLAY`/`XAUTHORITY` (работает и на обычном рабочем столе, и на xrdp).
+
+### Windows
+
+Запустите `OpenChamber_ru-<версия>-win-x64.exe` (установщик NSIS).
+
+### macOS
+
+Откройте `OpenChamber_ru-<версия>-mac-x64.dmg` и перетащите OpenChamber в Applications.
 
 ### Android
 
-Скачайте `.apk` файл и установите на устройство.
+Скачайте `OpenChamber_ru-<версия>-android.apk` и установите его на устройство.
 
 ## Возможности OpenChamber
 
