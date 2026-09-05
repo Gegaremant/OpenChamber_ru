@@ -1,5 +1,4 @@
 import { linearIntegrationI18n } from './linear-integration.i18n';
-import { thirdPartyIntegrationI18n } from './third-party-integrations.i18n';
 export const settingsDict = {
   'settings.providers.page.openCodeGo.title': 'Отслеживание использования OpenCode Go',
   'settings.providers.page.openCodeGo.description': 'Подключите панель управления OpenCode Go, чтобы отображать скользящую, еженедельную и ежемесячную квоту.',
@@ -2223,6 +2222,7 @@ export const settingsDict = {
   'settings.openchamber.visual.field.followUpBehaviorDescription': 'Выберите, что произойдет, если вы нажмете Enter в последующем сообщении, пока агент еще отвечает.',
   'settings.openchamber.visual.option.followUpBehavior.steer.label': 'Управлять',
   'settings.openchamber.visual.option.followUpBehavior.queue.label': 'Очередь',
+  'settings.page.integrations.title': 'Интеграции',
+  'settings.page.integrations.description': 'Подключите GitHub и Linear, чтобы OpenChamber мог работать с вашими задачами и pull request-ами.',
   ...linearIntegrationI18n.ru,
-  ...thirdPartyIntegrationI18n.ru,
 } as const;

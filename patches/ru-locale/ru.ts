@@ -2210,6 +2210,8 @@ export const dict: Record<I18nKey, string> = {
   'chat.queuedMessage.send': 'отправить',
   'chat.queuedMessage.removeAria': 'Удалить из очереди',
   'chat.queuedMessage.reorderAria': 'Перетащите, чтобы изменить порядок',
+  'chat.queuedMessage.toast.queueFailed': 'Не удалось поставить сообщение в очередь. Оно вернулось в поле ввода.',
+  'chat.queuedMessage.toast.takeFailed': 'Не удалось загрузить сообщение из очереди. Попробуйте ещё раз.',
   'chat.container.returnToParent.aria': 'Вернуться к родительскому сеансу',
   'chat.container.returnToParent.titleNamed': 'Вернуться к: {title}',
   'chat.container.returnToParent.title': 'Вернуться к родительскому сеансу',

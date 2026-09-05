@@ -50,9 +50,9 @@ echo "  ✓ ru.settings.ts скопирован"
 echo ""
 echo "[2/5] Модифицируем runtime.ts..."
 
-perl -0pi -e "s/export type Locale = 'en' \| 'de' \| 'fr' \| 'zh-CN' \| 'zh-TW' \| 'uk' \| 'es'/export type Locale = 'en' \| 'de' \| 'fr' \| 'zh-CN' \| 'zh-TW' \| 'uk' \| 'ru' \| 'es'/" packages/ui/src/lib/i18n/runtime.ts
-perl -0pi -e "s/\['en', 'de', 'fr', 'zh-CN', 'zh-TW', 'uk', 'es'/['en', 'de', 'fr', 'zh-CN', 'zh-TW', 'uk', 'ru', 'es'/" packages/ui/src/lib/i18n/runtime.ts
-perl -0pi -e "s/'common\.language\.ukrainian' \| 'common\.language\.spanish'/'common.language.ukrainian' \| 'common.language.russian' \| 'common.language.spanish'/" packages/ui/src/lib/i18n/runtime.ts
+perl -0pi -e "s/export type Locale = 'en' \| 'de' \| 'fr' \| 'zh-CN' \| 'zh-TW' \| 'uk' \| 'es' \| 'pt-BR' \| 'ko' \| 'pl' \| 'ja' \| 'tr';/export type Locale = 'en' | 'de' | 'fr' | 'zh-CN' | 'zh-TW' | 'uk' | 'es' | 'pt-BR' | 'ko' | 'pl' | 'ja' | 'tr' | 'ru';/" packages/ui/src/lib/i18n/runtime.ts
+perl -0pi -e "s/\['en', 'de', 'fr', 'zh-CN', 'zh-TW', 'uk', 'es', 'pt-BR', 'ko', 'pl', 'ja', 'tr'\] as const satisfies readonly Locale\[\]/['en', 'de', 'fr', 'zh-CN', 'zh-TW', 'uk', 'es', 'pt-BR', 'ko', 'pl', 'ja', 'tr', 'ru'] as const satisfies readonly Locale[]/" packages/ui/src/lib/i18n/runtime.ts
+perl -0pi -e "s/'common\.language\.ukrainian' \| 'common\.language\.spanish' \| 'common\.language\.brazilianPortuguese' \| 'common\.language\.korean' \| 'common\.language\.polish' \| 'common\.language\.german' \| 'common\.language\.japanese' \| 'common\.language\.turkish'/'common.language.ukrainian' | 'common.language.spanish' | 'common.language.brazilianPortuguese' | 'common.language.korean' | 'common.language.polish' | 'common.language.german' | 'common.language.japanese' | 'common.language.turkish' | 'common.language.russian'/" packages/ui/src/lib/i18n/runtime.ts
 perl -0pi -e "s/(uk: 'common\.language\.ukrainian',)/\$1\n  ru: 'common.language.russian',/" packages/ui/src/lib/i18n/runtime.ts
 perl -0pi -e "s/return 'uk';/return 'uk';\n  }\n  if (normalized === 'ru' || normalized.startsWith('ru-') || normalized === 'be' || normalized.startsWith('be-')) {\n    return 'ru';/s" packages/ui/src/lib/i18n/runtime.ts
 perl -0pi -e "s/export const DEFAULT_LOCALE: Locale = 'en';/export const DEFAULT_LOCALE: Locale = 'ru';/" packages/ui/src/lib/i18n/runtime.ts
@@ -65,7 +65,7 @@ echo "  ✓ runtime.ts обновлён (RU — язык по умолчанию
 echo ""
 echo "[3/5] Модифицируем store.ts..."
 
-perl -0pi -e "s/(\? await import\('\.\/messages\/uk'\) as \{ dict: I18nDictionary \}\n)/\$1            : locale === 'ru'\n              ? await import('.\/messages\/ru') as { dict: I18nDictionary }\n/" packages/ui/src/lib/i18n/store.ts
+perl -0pi -e "s/                      \? await import\('\.\/messages\/tr'\) as \{ dict: I18nDictionary \}\n                      : \{ dict: enDict \};\n  dictionaries\.set/                      ? await import('.\/messages\/tr') as { dict: I18nDictionary }\n                      : locale === 'ru'\n                        ? await import('.\/messages\/ru') as { dict: I18nDictionary }\n                        : { dict: enDict };\n  dictionaries.set/s" packages/ui/src/lib/i18n/store.ts
 perl -0pi -e "s/import \{ dict as enDict, type I18nKey \} from '\.\/messages\/en';/import { dict as enDict, type I18nKey } from '.\/messages\/en';\nimport { dict as ruDict } from '.\/messages\/ru';/" packages/ui/src/lib/i18n/store.ts
 perl -0pi -e "s/\[\[DEFAULT_LOCALE, enDict\]\]/[[DEFAULT_LOCALE, ruDict]]/" packages/ui/src/lib/i18n/store.ts
 perl -0pi -e "s/dictionaries\.set\(DEFAULT_LOCALE, enDict\);/dictionaries.set(DEFAULT_LOCALE, ruDict);/" packages/ui/src/lib/i18n/store.ts
@@ -174,7 +174,6 @@ INTEGRATION_FILES=(
   "packages/ui/src/lib/i18n/messages/linear-integration.i18n.ts"
   "packages/ui/src/lib/i18n/messages/linear-issue-picker.i18n.ts"
   "packages/ui/src/lib/i18n/messages/linear-panel.i18n.ts"
-  "packages/ui/src/lib/i18n/messages/third-party-integrations.i18n.ts"
 )
 
 # Полные версии интеграционных файлов с ru блоками лежат в patches/ru-locale
