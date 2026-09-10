@@ -147,7 +147,7 @@ for file in "${!RUSSIAN_NAMES[@]}"; do
   filepath="packages/ui/src/lib/i18n/messages/$file"
   if [ -f "$filepath" ]; then
     line="${RUSSIAN_NAMES[$file]}"
-    perl -0pi -e "s/(common\.language\.turkish:.*\n)/\$1$line\n/" "$filepath"
+    perl -0pi -e "s/(.*common\.language\.turkish.*\n)/\$1$line\n/" "$filepath"
     echo "  ✓ $file"
   fi
 done
