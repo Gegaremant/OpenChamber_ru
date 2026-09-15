@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 
 import { dict as enDict, type I18nKey } from './messages/en';
+import { dict as ruDict } from './messages/ru';
 import { DEFAULT_LOCALE, detectInitialLocale, type Locale, writeStoredLocale } from './runtime';
 
 export type I18nParams = Record<string, string | number | boolean | null | undefined>;
@@ -13,11 +14,11 @@ type I18nState = {
   setLocale: (locale: Locale) => void;
 };
 
-const dictionaries = new Map<Locale, I18nDictionary>([[DEFAULT_LOCALE, enDict]]);
+const dictionaries = new Map<Locale, I18nDictionary>([[DEFAULT_LOCALE, ruDict]]);
 
 export function resetI18nDictionaryCacheForTests(): void {
   dictionaries.clear();
-  dictionaries.set(DEFAULT_LOCALE, enDict);
+  dictionaries.set(DEFAULT_LOCALE, ruDict);
 }
 
 async function loadDictionary(locale: Locale): Promise<I18nDictionary> {
@@ -50,14 +51,16 @@ async function loadDictionary(locale: Locale): Promise<I18nDictionary> {
                     ? await import('./messages/ja') as { dict: I18nDictionary }
                     : locale === 'tr'
                       ? await import('./messages/tr') as { dict: I18nDictionary }
-                      : { dict: enDict };
+                      : locale === 'ru'
+                        ? await import('./messages/ru') as { dict: I18nDictionary }
+                        : { dict: enDict };
   dictionaries.set(locale, mod.dict);
   return mod.dict;
 }
 
 export const useI18nStore = create<I18nState>()((set, get) => ({
   locale: DEFAULT_LOCALE,
-  dictionary: enDict,
+  dictionary: ruDict,
   loadingLocale: null,
   setLocale: (locale) => {
     const current = get();

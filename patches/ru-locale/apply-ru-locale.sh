@@ -128,29 +128,28 @@ const RU_MESSAGES: BootstrapMessages = {
 echo ""
 echo "[бонус] Добавляем 'common.language.russian' во все локали..."
 
-declare -A RUSSIAN_NAMES=(
-  ["en.ts"]="'common.language.russian': 'Russian',"
-  ["de.ts"]="'common.language.russian': 'Russisch',"
-  ["es.ts"]="'common.language.russian': 'Ruso',"
-  ["fr.ts"]="'common.language.russian': 'Russe',"
-  ["ja.ts"]="'common.language.russian': 'ロシア語',"
-  ["ko.ts"]="'common.language.russian': '러시아어',"
-  ["pl.ts"]="'common.language.russian': 'Rosyjski',"
-  ["pt-BR.ts"]="'common.language.russian': 'Russo',"
-  ["tr.ts"]="'common.language.russian': 'Rusça',"
-  ["uk.ts"]="'common.language.russian': 'Російська',"
-  ["zh-CN.ts"]="'common.language.russian': '俄语',"
-  ["zh-TW.ts"]="'common.language.russian': '俄語',"
-)
-
-for file in "${!RUSSIAN_NAMES[@]}"; do
-  filepath="packages/ui/src/lib/i18n/messages/$file"
+add_russian_label() {
+  local file="$1"
+  local label="$2"
+  local filepath="packages/ui/src/lib/i18n/messages/$file"
   if [ -f "$filepath" ]; then
-    line="${RUSSIAN_NAMES[$file]}"
-    perl -0pi -e "s/(.*common\.language\.turkish.*\n)/\$1$line\n/" "$filepath"
+    perl -0pi -e "s/(.*common\.language\.turkish.*\n)/\$1'common.language.russian': '$label',\n/" "$filepath"
     echo "  ✓ $file"
   fi
-done
+}
+
+add_russian_label "en.ts" "Russian"
+add_russian_label "de.ts" "Russisch"
+add_russian_label "es.ts" "Ruso"
+add_russian_label "fr.ts" "Russe"
+add_russian_label "ja.ts" "ロシア語"
+add_russian_label "ko.ts" "러시아어"
+add_russian_label "pl.ts" "Rosyjski"
+add_russian_label "pt-BR.ts" "Russo"
+add_russian_label "tr.ts" "Rusça"
+add_russian_label "uk.ts" "Російська"
+add_russian_label "zh-CN.ts" "俄语"
+add_russian_label "zh-TW.ts" "俄語"
 
 # ============================================================
 # 7. walkthrough/languages.js — добавляем ru: 'Russian'
