@@ -3,7 +3,6 @@ export const settingsDict = {
   'settings.page.integrations.title': 'Интеграции',
   'settings.page.integrations.description': 'Подключайте внешние сервисы, загружайте расширения и управляйте квотами.',
   'settings.providers.page.openCodeGo.title': 'Мониторинг использования OpenCode Go',
-  'settings.providers.page.openCodeGo.title': 'Мониторинг использования OpenCode Go',
   'settings.providers.page.openCodeGo.description': 'Подключите панель управления OpenCode Go, чтобы показывать скользящую, еженедельную и ежемесячную квоты.',
   'settings.providers.page.openCodeGo.workspaceId': 'Идентификатор рабочей области',
   'settings.providers.page.openCodeGo.authCookie': 'Файл cookie аутентификации',
@@ -2275,5 +2274,8 @@ export const settingsDict = {
   'settings.projects.shared.title': 'Конфигурация репозитория',
   'settings.projects.shared.toast.shareFailed': 'Не удалось обновить конфигурацию репозитория',
   'settings.projects.shared.trusted': 'Команды репозитория доверены на этом экземпляре',
+  'settings.openchamber.sessionRetention.archivedTooltip': 'Удаляет истёкшие архивные сессии. Сохраняет 5 самых недавно архивированных, открытую, запущенные и общие сессии. Родительская сессия сохраняется, если её удаление также удалило бы защищённый дочерний элемент.',
+  'settings.openchamber.sessionRetention.field.onlyArchived': 'Только архивные сессии',
+  'settings.openchamber.sessionRetention.field.onlyArchivedDescription': 'Удаляет архивные сессии и отсчитывает период хранения с момента архивации. Неархивные сессии сохраняются.',
   ...linearIntegrationI18n.ru,
 } as const;
