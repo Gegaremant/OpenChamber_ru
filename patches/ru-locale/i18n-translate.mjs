@@ -11,7 +11,9 @@
 //   TRANSLATE_API_PASS  — пароль для Basic-авторизации
 //   TRANSLATE_API_BASE  — URL эндпоинта, например https://api.openai.com/v1
 //                         или http://IP:ПОРТ/v1 (Ollama/локальный сервер)
-//   TRANSLATE_MODEL     — модель, по умолчанию gpt-4o-mini
+//   TRANSLATE_MODEL              — основная модель, по умолчанию gpt-4o-mini
+//   TRANSLATE_FALLBACK_MODEL     — резервная модель (допереводит пропущенное)
+//   TRANSLATE_RESERVE_MODEL      — запасная модель (последняя линия)
 //
 // Выход: 0 — всё покрыто (или переводы добавлены), 1 — есть пропуски и ключа нет.
 import fs from 'node:fs';
@@ -73,36 +75,62 @@ if (!apiKey && !apiPass) {
 }
 
 const base = process.env.TRANSLATE_API_BASE || 'https://api.openai.com/v1';
-const model = process.env.TRANSLATE_MODEL || 'gpt-4o-mini';
+
+const models = [process.env.TRANSLATE_MODEL || 'gpt-4o-mini'];
+if (process.env.TRANSLATE_FALLBACK_MODEL) models.push(process.env.TRANSLATE_FALLBACK_MODEL);
+if (process.env.TRANSLATE_RESERVE_MODEL) models.push(process.env.TRANSLATE_RESERVE_MODEL);
 
 let headers = { 'Content-Type': 'application/json' };
 if (apiPass) headers.Authorization = 'Basic ' + Buffer.from(`${apiUser || ''}:${apiPass}`).toString('base64');
 else headers.Authorization = `Bearer ${apiKey}`;
 
-const prompt = `Ты — переводчик интерфейса OpenChamber на русский язык. Переведи значения на русский. Сохрани все плейсхолдеры вида {foo} без изменений. Соблюдай терминологию: сессия (не «сеанс»), рабочее дерево (worktree), субагент, MCP-сервер, коммит, ветка, OpenCode/OpenChamber — латиницей, обращение на «вы». Верни ТОЛЬКО JSON-объект с теми же ключами и переведёнными значениями. Не добавляй код-фенсы.
+const unquotedFix = (v) => String(v).replace(/^'(.*)'$/s, "$1");
 
-${JSON.stringify(payload, null, 2)}`;
+// Основная → резервная → запасная: каждая модель переводит только оставшиеся
+// ключи, результаты сливаются. Если модель упала или вернула мусор — пробуем следующую.
+const json = {};
+const covered = () => Object.keys(payload).filter((k) => json[k] && typeof json[k] === 'string' && json[k].trim());
+const uncovered = () => Object.keys(payload).filter((k) => !covered().includes(k));
 
-let json;
-try {
-  const res = await fetch(`${base}/chat/completions`, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify({ model, temperature: 0.2, messages: [{ role: 'user', content: prompt }] }),
-  });
-  if (!res.ok) {
-    console.error(`::error::LLM ${res.status}: ${await res.text()}`);
-    process.exit(1);
+for (const model of models) {
+  const todo = uncovered();
+  if (!todo.length) break;
+  const sub = {};
+  for (const k of todo) sub[k] = payload[k];
+  const prompt = `Ты — переводчик интерфейса OpenChamber на русский язык. Переведи значения на русский. Сохрани все плейсхолдеры вида {foo} без изменений. Соблюдай терминологию: сессия (не «сеанс»), рабочее дерево (worktree), субагент, MCP-сервер, коммит, ветка, OpenCode/OpenChamber — латиницей, обращение на «вы». Верни ТОЛЬКО JSON-объект с теми же ключами и переведёнными значениями. Не добавляй код-фенсы.\n\n${JSON.stringify(sub, null, 2)}`;
+
+  let filled = 0;
+  let failed = null;
+  try {
+    const res = await fetch(`${base}/chat/completions`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ model, temperature: 0.2, messages: [{ role: 'user', content: prompt }] }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}: ${(await res.text()).slice(0, 200)}`);
+    const data = await res.json();
+    const content = data.choices?.[0]?.message?.content || '';
+    const parsed = JSON.parse(content.replace(/```json|```/g, '').trim());
+    let count = 0;
+    for (const k of todo) {
+      const v = parsed[k];
+      const clean = typeof v === 'string' && v.trim() ? unquotedFix(v).trim() : '';
+      if (clean) { json[k] = clean; count++; }
+    }
+    filled = count;
+  } catch (e) {
+    failed = e.message;
   }
-  const data = await res.json();
-  const content = data.choices?.[0]?.message?.content || '';
-  json = JSON.parse(content.replace(/```json|```/g, '').trim());
-} catch (e) {
-  console.error(`::error::ошибка LLM: ${e.message}`);
+  console.log(`  • модель ${model}: переведено ${filled}/${todo.length}${failed ? ` (ошибка: ${failed})` : ''}`);
+  if (filled === 0 && failed) console.warn(`::warning::Модель ${model} не ответила: ${failed}`);
+}
+
+const unlucky = uncovered();
+if (unlucky.length) {
+  console.error(`::error::Ни одна из моделей (${models.join(', ')}) не перевела: ${unlucky.slice(0, 50).join(', ')}`);
   process.exit(1);
 }
 
-const unquotedFix = (v) => v.replace(/^'(.*)'$/s, "$1");
 let anyWrite = false;
 
 for (const [, keys, , filePath] of groups) {
