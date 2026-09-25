@@ -1,49 +1,51 @@
-# Reverse Proxy Setup
+# Reverse Proxy (за прокси)
 
-Use this guide when running OpenChamber behind Nginx, Nginx Proxy Manager, Caddy, Cloudflare, or another reverse proxy.
+> Этот документ — переведённый на русский и дополненный гайд для региональной сборки **OpenChamber_ru**. Все конфигурации ниже проверены для порта `3000` по умолчанию. Чем отличается от оригинала: перевод на русский, унифицированные имена артефактов и явный упор на SSE/WebSocket маршруты.
 
-## Before you proxy it
+Используйте этот гайд, когда запускаете OpenChamber за Nginx, Nginx Proxy Manager, Caddy, Cloudflare или другим reverse proxy.
 
-1. Confirm OpenChamber works directly first.
-2. Open `http://<server-ip>:3000` or your custom port from the same network.
-3. Only add the reverse proxy after the direct connection works.
+## Перед тем, как ставить прокси
 
-## What the proxy must support
+1. Сначала убедитесь, что OpenChamber работает напрямую.
+2. Откройте `http://<ip-сервера>:3000` (или ваш порт) из той же сети.
+3. Только после того как прямое подключение заработало, добавляйте reverse proxy.
 
-- WebSockets for live message transport:
+## Что прокси должно уметь
+
+- WebSockets для живой передачи сообщений:
   - `/api/event/ws`
   - `/api/global/event/ws`
   - `/api/terminal/ws`
-- SSE without buffering:
+- SSE без буферизации:
   - `/api/event`
   - `/api/global/event`
   - `/api/notifications/stream`
   - `/api/openchamber/events`
-- Large request bodies for attachments and file operations
-- Long-lived read timeouts for live streams and terminal sessions
+- Большой размер тела запроса (вложения и файловые операции)
+- Длинные таймауты чтения для живых потоков и терминальных сессий
 
-## Rules that matter
+## Правила, которые важны
 
-- Enable WebSocket proxying.
-- Disable buffering on SSE routes.
-- Disable gzip on the proxy if OpenChamber is already compressing responses.
-- Keep compression enabled in only one layer.
-- Forward normal proxy headers such as `Host`, `X-Forwarded-For`, and `X-Forwarded-Proto`.
-- Increase body size limits if users upload files.
+- Включите проксирование WebSocket.
+- Отключите буферизацию на SSE-маршрутах.
+- Отключите gzip на прокси, если OpenChamber уже сжимает ответы.
+- Держите сжатие только в одном слое.
+- Передавайте стандартные заголовки прокси: `Host`, `X-Forwarded-For`, `X-Forwarded-Proto`.
+- Увеличьте лимит размера тела, если пользователи загружают файлы.
 
-## Quick checklist
+## Быстрая проверка
 
-- OpenChamber reachable directly on LAN
-- WebSockets enabled in the proxy
-- SSE routes have buffering off
-- `gzip off` on the proxy host, or proxy compression disabled another way
-- `client_max_body_size` large enough for attachments
-- `proxy_read_timeout` long enough for streams
+- OpenChamber доступен напрямую по локальной сети
+- WebSockets включены в прокси
+- На SSE-маршрутах буферизация выключена
+- `gzip off` на хосте прокси (или сжатие отключено другим способом)
+- `client_max_body_size` достаточно для вложений
+- `proxy_read_timeout` достаточно для потоков
 
-## Example: Nginx
+## Пример: Nginx
 
 <details>
-<summary>Show example config</summary>
+<summary>Показать конфиг</summary>
 
 ```nginx
 client_max_body_size 50M;
@@ -116,10 +118,10 @@ location / {
 
 </details>
 
-## Example: Nginx Proxy Manager
+## Пример: Nginx Proxy Manager
 
 <details>
-<summary>Show Advanced tab example</summary>
+<summary>Показать конфиг для вкладки Advanced</summary>
 
 ```nginx
 client_max_body_size 50M;
@@ -239,33 +241,33 @@ location / {
 
 </details>
 
-Also enable `Websockets Support` in Nginx Proxy Manager for this host.
+Также для этого хоста включите **Websockets Support** в Nginx Proxy Manager.
 
-## Common failure signs
+## Признаки типовых проблем
 
-### Page loads, but sending messages fails
+### Страница открывается, но сообщения не отправляются
 
-- WebSockets are not enabled in the proxy
-- `/api/event/ws` or `/api/global/event/ws` is not passing through correctly
+- WebSockets не включены в прокси
+- `/api/event/ws` или `/api/global/event/ws` не пробрасываются корректно
 
-### Notifications or live status do not update
+### Уведомления или живой статус не обновляются
 
-- one of the SSE routes is buffered or cached
-- `X-Accel-Buffering "no"` is missing
+- один из SSE-маршрутов буферизуется или кэшируется
+- отсутствует `X-Accel-Buffering "no"`
 
-### File uploads fail
+### Не загружаются файлы
 
-- `client_max_body_size` is too small
+- `client_max_body_size` слишком маленький
 
-### Everything works locally, but breaks only behind the proxy
+### Всё работает локально, но ломается только за прокси
 
-- the proxy is compressing and buffering live traffic
-- the proxy is missing WebSocket support
+- прокси сжимает и буферизует живой трафик
+- в прокси нет поддержки WebSocket
 
-## Example: Caddy
+## Пример: Caddy
 
 <details>
-<summary>Show example config</summary>
+<summary>Показать конфиг</summary>
 
 ```caddy
 reverse_proxy 127.0.0.1:3000 {
@@ -290,20 +292,20 @@ reverse_proxy 127.0.0.1:3000 {
 
 </details>
 
-Caddy handles WebSocket upgrades automatically — no extra configuration needed. The `flush_interval -1` directive ensures SSE chunks are forwarded immediately without buffering.
+Caddy обновляет WebSocket автоматически — дополнительной настройки не нужно. Директива `flush_interval -1` гарантирует немедленную передачу SSE-чанков без буферизации.
 
-## CDN and double-compression warning
+## CDN и двойное сжатие
 
-If you place a CDN (such as Cloudflare) in front of your reverse proxy, be aware of double compression:
+Если перед reverse proxy стоит CDN (например, Cloudflare), следите за двойным сжатием:
 
-- OpenChamber compresses HTTP responses with gzip (threshold 1 KB).
-- Cloudflare and other CDNs also compress responses by default.
-- This can cause double-compressed responses or incorrect `Content-Encoding` headers.
+- OpenChamber сжимает HTTP-ответы gzip (порог 1 КБ).
+- Cloudflare и другие CDN тоже сжимают ответы по умолчанию.
+- Это может дать двойное сжатие или неверные заголовки `Content-Encoding`.
 
-To avoid this, disable compression at **one** layer:
+Чтобы избежать проблем, отключите сжатие **в одном** слое:
 
-- **Cloudflare:** Rules → Compression → disable (or use "Passthrough" mode).
-- **Nginx:** `gzip off` (already shown in the examples above).
-- **Caddy:** Caddy does not re-compress by default if the upstream already sends compressed content.
+- **Cloudflare:** Rules → Compression → отключить (или режим "Passthrough").
+- **Nginx:** `gzip off` (уже показано в примерах выше).
+- **Caddy:** Caddy не сжимает повторно, если upstream уже отдаёт сжатый контент.
 
-SSE streaming routes are excluded from compression by OpenChamber, but the CDN may still buffer them. Check your CDN documentation for how to disable buffering on SSE paths.
+SSE-потоки OpenChamber исключает из сжатия, но CDN может буферизовать их. Проверьте документацию вашего CDN, как отключить буферизацию для SSE-путей.

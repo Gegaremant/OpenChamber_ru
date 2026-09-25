@@ -1,27 +1,29 @@
-# Custom Themes
+# Кастомные темы
 
-OpenChamber supports user-defined themes. Drop a JSON file into the themes directory and reload — no app restart required.
+> Перевод официального гайда по темам для региональной сборки **OpenChamber_ru**. Изменений в формате нет — темы, созданные для любой версии OpenChamber, работают как есть.
 
-## Quick Start
+OpenChamber поддерживает пользовательские темы. Положите JSON-файл в каталог тем и перезагрузите список — перезапуск приложения не нужен.
 
-1. Create the themes directory:
+## Быстрый старт
+
+1. Создайте каталог тем:
    ```bash
    mkdir -p ~/.config/openchamber/themes
    ```
 
-2. Create a theme JSON file (e.g., `my-theme.json`) with the format below.
+2. Создайте JSON-файл темы (например, `my-theme.json`) в формате ниже.
 
-3. In OpenChamber: **Settings → Theme → Reload themes**.
+3. В OpenChamber: **Settings → Theme → Reload themes** (Настройки → Тема → Перезагрузить темы).
 
-4. Select your theme from the dropdown.
+4. Выберите тему из списка.
 
-## Theme Location
+## Где хранятся темы
 
-| Platform | Path |
+| Платформа | Путь |
 |----------|------|
 | macOS/Linux | `~/.config/openchamber/themes/` |
 
-## Theme Format
+## Формат темы
 
 ```json
 {
@@ -209,21 +211,21 @@ OpenChamber supports user-defined themes. Drop a JSON file into the themes direc
 }
 ```
 
-## Surface Alpha Requirement
+## Требование к полям surface
 
-- `colors.surface.muted` and `colors.surface.elevated` must always use 90 alpha (`...90` in 8-digit hex, e.g. `#1C1B1A90`).
+- `colors.surface.muted` и `colors.surface.elevated` всегда должны иметь альфу 90 (`...90` в 8-значном hex, например `#1C1B1A90`).
 
-## Validation
+## Проверка
 
-Themes are validated on load. Invalid themes are skipped with a console warning.
+Темы проверяются при загрузке. Некорректные темы пропускаются с предупреждением в консоли.
 
-Common issues:
-- Missing required fields
-- Invalid `variant` (must be `"light"` or `"dark"`)
-- File size > 512KB
+Частые проблемы:
+- отсутствуют обязательные поля
+- некорректный `variant` (должен быть `"light"` или `"dark"`)
+- размер файла больше 512 КБ
 
-## Tips
+## Советы
 
-- Use hex with alpha for transparency (e.g., `#FFFFFF20`)
-- Reference built-in themes in `packages/ui/src/lib/theme/themes/` for more examples
-- Theme `id` must be unique; duplicates are skipped
+- Используйте hex с альфой для прозрачности (например, `#FFFFFF20`)
+- Больше примеров — встроенные темы в `packages/ui/src/lib/theme/themes/`
+- `id` темы должен быть уникальным; дубликаты пропускаются
