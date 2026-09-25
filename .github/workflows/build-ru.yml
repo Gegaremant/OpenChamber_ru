@@ -25,6 +25,7 @@ env:
   BUN_VERSION: '1.3.14'
   NODE_VERSION: '22'
   ORIGINAL_REPO: 'https://github.com/openchamber/openchamber.git'
+  NODE_OPTIONS: '--max-old-space-size=4096'
 
 jobs:
   check-upstream:
@@ -59,8 +60,30 @@ jobs:
             fi
           fi
 
-  create-release:
+  i18n-sync:
     needs: check-upstream
+    if: needs.check-upstream.outputs.should_build == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Auto-translate new keys
+        run: |
+          set -euo pipefail
+          VERSION="${{ needs.check-upstream.outputs.new_version }}"
+          git clone --depth 1 --branch "v$VERSION" ${{ env.ORIGINAL_REPO }} upstream-src || { echo "::error::Тег v$VERSION не найден в upstream"; exit 1; }
+          node patches/ru-locale/i18n-translate.mjs upstream-src/packages/ui/src/lib/i18n/messages patches/ru-locale
+          git config user.name "OpenChamber RU bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add patches/ru-locale/ru.ts patches/ru-locale/ru.settings.ts
+          if ! git diff --cached --quiet; then
+            git commit -m "i18n: auto-translate new keys for v$VERSION [skip ci]"
+            git pull --rebase origin main || true
+            git push origin HEAD:main
+          fi
+
+  create-release:
+    needs: [check-upstream, i18n-sync]
     if: needs.check-upstream.outputs.should_build == 'true'
     runs-on: ubuntu-latest
     outputs:
@@ -86,15 +109,14 @@ jobs:
 
       - name: Clone original OpenChamber
         run: |
-          git clone --depth 1 --branch "v${{ needs.create-release.outputs.version }}" ${{ env.ORIGINAL_REPO }} build-source || \
-          git clone --depth 1 ${{ env.ORIGINAL_REPO }} build-source
+          git clone --depth 1 --branch "v${{ needs.create-release.outputs.version }}" ${{ env.ORIGINAL_REPO }} build-source || { echo "::error::Тег v${{ needs.create-release.outputs.version }} не найден в upstream — fallback-клон удалён"; exit 1; }
 
       - name: Apply Russian locale
         run: |
           cd build-source
           cp ../patches/ru-locale/ru.ts packages/ui/src/lib/i18n/messages/ru.ts
           cp ../patches/ru-locale/ru.settings.ts packages/ui/src/lib/i18n/messages/ru.settings.ts
-          bash ../patches/ru-locale/apply-ru-locale.sh "${{ needs.create-release.outputs.version }}" .
+          I18N_STRICT=1 bash ../patches/ru-locale/apply-ru-locale.sh "${{ needs.create-release.outputs.version }}" .
 
       - name: Setup bun
         uses: oven-sh/setup-bun@v2
@@ -149,15 +171,14 @@ jobs:
 
       - name: Clone original OpenChamber
         run: |
-          git clone --depth 1 --branch "v${{ needs.create-release.outputs.version }}" ${{ env.ORIGINAL_REPO }} build-source || \
-          git clone --depth 1 ${{ env.ORIGINAL_REPO }} build-source
+          git clone --depth 1 --branch "v${{ needs.create-release.outputs.version }}" ${{ env.ORIGINAL_REPO }} build-source || { echo "::error::Тег v${{ needs.create-release.outputs.version }} не найден в upstream — fallback-клон удалён"; exit 1; }
 
       - name: Apply Russian locale
         run: |
           cd build-source
           cp ../patches/ru-locale/ru.ts packages/ui/src/lib/i18n/messages/ru.ts
           cp ../patches/ru-locale/ru.settings.ts packages/ui/src/lib/i18n/messages/ru.settings.ts
-          bash ../patches/ru-locale/apply-ru-locale.sh "${{ needs.create-release.outputs.version }}" .
+          I18N_STRICT=1 bash ../patches/ru-locale/apply-ru-locale.sh "${{ needs.create-release.outputs.version }}" .
 
       - name: Install wine
         run: |
@@ -218,15 +239,14 @@ jobs:
 
       - name: Clone original OpenChamber
         run: |
-          git clone --depth 1 --branch "v${{ needs.create-release.outputs.version }}" ${{ env.ORIGINAL_REPO }} build-source || \
-          git clone --depth 1 ${{ env.ORIGINAL_REPO }} build-source
+          git clone --depth 1 --branch "v${{ needs.create-release.outputs.version }}" ${{ env.ORIGINAL_REPO }} build-source || { echo "::error::Тег v${{ needs.create-release.outputs.version }} не найден в upstream — fallback-клон удалён"; exit 1; }
 
       - name: Apply Russian locale
         run: |
           cd build-source
           cp ../patches/ru-locale/ru.ts packages/ui/src/lib/i18n/messages/ru.ts
           cp ../patches/ru-locale/ru.settings.ts packages/ui/src/lib/i18n/messages/ru.settings.ts
-          bash ../patches/ru-locale/apply-ru-locale.sh "${{ needs.create-release.outputs.version }}" .
+          I18N_STRICT=1 bash ../patches/ru-locale/apply-ru-locale.sh "${{ needs.create-release.outputs.version }}" .
 
       - name: Setup bun
         uses: oven-sh/setup-bun@v2
@@ -253,6 +273,7 @@ jobs:
         working-directory: build-source/packages/electron
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+          NODE_OPTIONS: '--max-old-space-size=8192'
         run: |
           set -euo pipefail
           bun run build:web-assets
@@ -289,15 +310,14 @@ jobs:
 
       - name: Clone original OpenChamber
         run: |
-          git clone --depth 1 --branch "v${{ needs.create-release.outputs.version }}" ${{ env.ORIGINAL_REPO }} build-source || \
-          git clone --depth 1 ${{ env.ORIGINAL_REPO }} build-source
+          git clone --depth 1 --branch "v${{ needs.create-release.outputs.version }}" ${{ env.ORIGINAL_REPO }} build-source || { echo "::error::Тег v${{ needs.create-release.outputs.version }} не найден в upstream — fallback-клон удалён"; exit 1; }
 
       - name: Apply Russian locale
         run: |
           cd build-source
           cp ../patches/ru-locale/ru.ts packages/ui/src/lib/i18n/messages/ru.ts
           cp ../patches/ru-locale/ru.settings.ts packages/ui/src/lib/i18n/messages/ru.settings.ts
-          bash ../patches/ru-locale/apply-ru-locale.sh "${{ needs.create-release.outputs.version }}" .
+          I18N_STRICT=1 bash ../patches/ru-locale/apply-ru-locale.sh "${{ needs.create-release.outputs.version }}" .
 
       - name: Setup bun
         uses: oven-sh/setup-bun@v2

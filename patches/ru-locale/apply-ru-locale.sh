@@ -190,6 +190,44 @@ for intfile in "${INTEGRATION_FILES[@]}"; do
 done
 
 # ============================================================
+# 9. Нативное меню Electron (File/Edit/View и т.п.)
+# ============================================================
+echo ""
+echo "[6/6] Локализуем нативное меню Electron..."
+
+MENU_FILE="packages/electron/main.mjs"
+if [ -f "$MENU_FILE" ]; then
+  if [ -f "$SCRIPT_DIR/patch-menu.mjs" ]; then
+    node "$SCRIPT_DIR/patch-menu.mjs" "$MENU_FILE"
+  else
+    echo "  → patch-menu.mjs не найден, пропуск"
+  fi
+else
+  echo "  → $MENU_FILE не найден, пропуск"
+fi
+
+# ============================================================
+# 10. Проверка полноты русской локали
+# ============================================================
+echo ""
+echo "[check] Полнота русской локали..."
+
+if [ -f "$SCRIPT_DIR/i18n-check.mjs" ]; then
+  if node "$SCRIPT_DIR/i18n-check.mjs" "packages/ui/src/lib/i18n/messages"; then
+    echo "  ✓ Полное покрытие"
+  else
+    echo "  ⚠ Есть непереведённые ключи"
+    if [ "${I18N_STRICT:-0}" = "1" ]; then
+      echo "::error::В русской локали пропущены ключи (I18N_STRICT=1)"
+      exit 1
+    fi
+    [ -n "${CI:-}" ] && echo "::warning::В русской локали есть пропуски — обновите patches/ru-locale"
+  fi
+else
+  echo "  → i18n-check.mjs не найден, пропуск"
+fi
+
+# ============================================================
 # ГОТОВО
 # ============================================================
 echo ""
