@@ -70,6 +70,8 @@ jobs:
       - name: Auto-translate new keys
         env:
           TRANSLATE_API_KEY: ${{ secrets.TRANSLATE_API_KEY }}
+          TRANSLATE_API_USER: ${{ secrets.TRANSLATE_API_USER }}
+          TRANSLATE_API_PASS: ${{ secrets.TRANSLATE_API_PASS }}
           TRANSLATE_API_BASE: ${{ secrets.TRANSLATE_API_BASE }}
           TRANSLATE_MODEL: ${{ secrets.TRANSLATE_MODEL }}
         run: |

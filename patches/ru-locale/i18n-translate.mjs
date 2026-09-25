@@ -5,10 +5,13 @@
 //
 // <patches_dir> — каталог patches/ru-locale (ru.ts, ru.settings.ts).
 //
-// Окружение:
-//   TRANSLATE_API_KEY      — обязателен, если есть пропуски
-//   TRANSLATE_API_BASE     — по умолчанию https://api.openai.com/v1
-//   TRANSLATE_MODEL        — по умолчанию gpt-4o-mini
+// Окружение (всё через Секреты репозитория):
+//   TRANSLATE_API_KEY   — Bearer-токен (или токен OpenAI-совместимого провайдера)
+//   TRANSLATE_API_USER  — логин для Basic-авторизации (вместе с PASS)
+//   TRANSLATE_API_PASS  — пароль для Basic-авторизации
+//   TRANSLATE_API_BASE  — URL эндпоинта, например https://api.openai.com/v1
+//                         или http://IP:ПОРТ/v1 (Ollama/локальный сервер)
+//   TRANSLATE_MODEL     — модель, по умолчанию gpt-4o-mini
 //
 // Выход: 0 — всё покрыто (или переводы добавлены), 1 — есть пропуски и ключа нет.
 import fs from 'node:fs';
@@ -62,13 +65,19 @@ for (const [, keys, en, ] of groups) for (const k of keys) payload[k] = en[k];
 console.log(`i18n-translate: пропусков ${missingMain.length} (main) + ${missingSet.length} (settings).`);
 
 const apiKey = process.env.TRANSLATE_API_KEY;
-if (!apiKey) {
-  console.error(`::error::Нет TRANSLATE_API_KEY. Переведите вручную ${missingMain.length + missingSet.length} ключей: ${Object.keys(payload).slice(0, 50).join(', ')}`);
+const apiUser = process.env.TRANSLATE_API_USER;
+const apiPass = process.env.TRANSLATE_API_PASS;
+if (!apiKey && !apiPass) {
+  console.error(`::error::Нет доступа к LLM (TRANSLATE_API_KEY или TRANSLATE_API_USER/PASS). Переведите вручную ${missingMain.length + missingSet.length} ключей: ${Object.keys(payload).slice(0, 50).join(', ')}`);
   process.exit(1);
 }
 
 const base = process.env.TRANSLATE_API_BASE || 'https://api.openai.com/v1';
 const model = process.env.TRANSLATE_MODEL || 'gpt-4o-mini';
+
+let headers = { 'Content-Type': 'application/json' };
+if (apiPass) headers.Authorization = 'Basic ' + Buffer.from(`${apiUser || ''}:${apiPass}`).toString('base64');
+else headers.Authorization = `Bearer ${apiKey}`;
 
 const prompt = `Ты — переводчик интерфейса OpenChamber на русский язык. Переведи значения на русский. Сохрани все плейсхолдеры вида {foo} без изменений. Соблюдай терминологию: сессия (не «сеанс»), рабочее дерево (worktree), субагент, MCP-сервер, коммит, ветка, OpenCode/OpenChamber — латиницей, обращение на «вы». Верни ТОЛЬКО JSON-объект с теми же ключами и переведёнными значениями. Не добавляй код-фенсы.
 
@@ -78,7 +87,7 @@ let json;
 try {
   const res = await fetch(`${base}/chat/completions`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+    headers,
     body: JSON.stringify({ model, temperature: 0.2, messages: [{ role: 'user', content: prompt }] }),
   });
   if (!res.ok) {
