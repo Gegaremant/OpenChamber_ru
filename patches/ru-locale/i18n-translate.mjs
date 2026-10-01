@@ -145,12 +145,31 @@ for (const [, keys, , filePath] of groups) {
     lines.push(`  '${k}': '${clean}',`);
   }
   if (!lines.length) continue;
-  let text = read(filePath);
-  const marker = filePath.endsWith('ru.ts') ? '\n};' : '\n  ...linearIntegrationI18n.ru,';
-  const idx = text.lastIndexOf(marker);
-  if (idx < 0) throw new Error(`маркер не найден в ${filePath}`);
-  text = text.slice(0, idx) + '\n' + lines.join('\n') + marker + text.slice(idx + marker.length);
-  fs.writeFileSync(filePath, text);
+
+  // Ищем строку-маркер сверху вниз, по форме, а не по точному отступу.
+  // Раньше здесь стоял lastIndexOf по жёсткой строке '\n  ...linearIntegrationI18n.ru,'
+  // с двумя пробелами; после того как форматтер переставил спред с 2 отступов на 4,
+  // маркер перестал совпадать и перевод падал с «маркер не найден» уже ПОСЛЕ
+  // успешного обращения к модели — то есть работа модели уходила в никуда.
+  const fileLines = read(filePath).split('\n');
+  const isSettings = filePath.endsWith('ru.settings.ts');
+  const markerRe = isSettings
+    ? /^\s*\.\.\.linearIntegrationI18n\.ru,\s*$/
+    : /^\s*\};?\s*$/;
+
+  let at = -1;
+  for (let i = fileLines.length - 1; i >= 0; i--) {
+    if (markerRe.test(fileLines[i])) { at = i; break; }
+  }
+  if (at < 0) {
+    throw new Error(
+      `маркер не найден в ${path.basename(filePath)} — вставка невозможна. ` +
+      'Обновите i18n-translate.mjs под текущую структуру файла.'
+    );
+  }
+
+  fileLines.splice(at, 0, ...lines);
+  fs.writeFileSync(filePath, fileLines.join('\n'));
   anyWrite = true;
   console.log(`  ✓ обновлён ${path.basename(filePath)} (+${lines.length} ключей)`);
 }

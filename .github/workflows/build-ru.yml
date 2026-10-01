@@ -81,14 +81,52 @@ jobs:
           VERSION="${{ needs.check-upstream.outputs.new_version }}"
           git clone --depth 1 --branch "v$VERSION" ${{ env.ORIGINAL_REPO }} upstream-src || { echo "::error::Тег v$VERSION не найден в upstream"; exit 1; }
           node patches/ru-locale/i18n-translate.mjs upstream-src/packages/ui/src/lib/i18n/messages patches/ru-locale
+
+      # Словарь отдаём артефактом: джобы сборки делают checkout на SHA запуска
+      # и свежий коммит из main иначе не видят. Артефакт — единственный
+      # способ гарантировать, что собирается именно переведённая версия.
+      - name: Publish translated dictionaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: ru-locale-${{ needs.check-upstream.outputs.new_version }}
+          path: |
+            patches/ru-locale/ru.ts
+            patches/ru-locale/ru.settings.ts
+            patches/ru-locale/linear-integration.i18n.ts
+            patches/ru-locale/linear-issue-picker.i18n.ts
+            patches/ru-locale/linear-panel.i18n.ts
+          if-no-files-found: error
+
+      - name: Commit translations back to main
+        env:
+          VERSION: ${{ needs.check-upstream.outputs.new_version }}
+        run: |
+          set -euo pipefail
           git config user.name "OpenChamber RU bot"
           git config user.email "bot@users.noreply.github.com"
-          git add patches/ru-locale/ru.ts patches/ru-locale/ru.settings.ts
-          if ! git diff --cached --quiet; then
-            git commit -m "i18n: auto-translate new keys for v$VERSION [skip ci]"
-            git pull --rebase origin main || true
-            git push origin HEAD:main
+          git add patches/ru-locale/ru.ts patches/ru-locale/ru.settings.ts \
+                  patches/ru-locale/linear-integration.i18n.ts \
+                  patches/ru-locale/linear-issue-picker.i18n.ts \
+                  patches/ru-locale/linear-panel.i18n.ts
+          if git diff --cached --quiet; then
+            echo "Новых переводов нет — коммит не требуется."
+            exit 0
           fi
+          git commit -m "i18n: auto-translate new keys for v$VERSION"
+          # Гонка возможна: cron запускается по расписанию, два прогона
+          # могут делить ветку. Rebase с повторами вместо молчаливого || true.
+          for attempt in 1 2 3 4 5; do
+            if git pull --rebase origin main && git push origin HEAD:main; then
+              echo "Переводы запушены с попытки $attempt."
+              exit 0
+            fi
+            echo "::warning::push не удался (попытка $attempt), пробуем снова"
+            sleep $((attempt * 10))
+          done
+          echo "::error::Не удалось запушить переводы после 5 попыток — сборка продолжит с переданным артефактом."
+          # Не роняем джобу: артефакт уже опубликован, сборка получит
+          # переводы из него. Коммит в main — это удобство для истории.
+          exit 0
 
   create-release:
     needs: [check-upstream, i18n-sync]
@@ -118,6 +156,12 @@ jobs:
       - name: Clone original OpenChamber
         run: |
           git clone --depth 1 --branch "v${{ needs.create-release.outputs.version }}" ${{ env.ORIGINAL_REPO }} build-source || { echo "::error::Тег v${{ needs.create-release.outputs.version }} не найден в upstream — fallback-клон удалён"; exit 1; }
+
+      - name: Download translated locale
+        uses: actions/download-artifact@v4
+        with:
+          name: ru-locale-${{ needs.create-release.outputs.version }}
+          path: patches/ru-locale
 
       - name: Apply Russian locale
         run: |
@@ -180,6 +224,12 @@ jobs:
       - name: Clone original OpenChamber
         run: |
           git clone --depth 1 --branch "v${{ needs.create-release.outputs.version }}" ${{ env.ORIGINAL_REPO }} build-source || { echo "::error::Тег v${{ needs.create-release.outputs.version }} не найден в upstream — fallback-клон удалён"; exit 1; }
+
+      - name: Download translated locale
+        uses: actions/download-artifact@v4
+        with:
+          name: ru-locale-${{ needs.create-release.outputs.version }}
+          path: patches/ru-locale
 
       - name: Apply Russian locale
         run: |
@@ -248,6 +298,12 @@ jobs:
       - name: Clone original OpenChamber
         run: |
           git clone --depth 1 --branch "v${{ needs.create-release.outputs.version }}" ${{ env.ORIGINAL_REPO }} build-source || { echo "::error::Тег v${{ needs.create-release.outputs.version }} не найден в upstream — fallback-клон удалён"; exit 1; }
+
+      - name: Download translated locale
+        uses: actions/download-artifact@v4
+        with:
+          name: ru-locale-${{ needs.create-release.outputs.version }}
+          path: patches/ru-locale
 
       - name: Apply Russian locale
         run: |
@@ -319,6 +375,12 @@ jobs:
       - name: Clone original OpenChamber
         run: |
           git clone --depth 1 --branch "v${{ needs.create-release.outputs.version }}" ${{ env.ORIGINAL_REPO }} build-source || { echo "::error::Тег v${{ needs.create-release.outputs.version }} не найден в upstream — fallback-клон удалён"; exit 1; }
+
+      - name: Download translated locale
+        uses: actions/download-artifact@v4
+        with:
+          name: ru-locale-${{ needs.create-release.outputs.version }}
+          path: patches/ru-locale
 
       - name: Apply Russian locale
         run: |
