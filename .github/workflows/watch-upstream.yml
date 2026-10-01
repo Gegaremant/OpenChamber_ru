@@ -1,0 +1,76 @@
+name: Watch upstream OpenChamber
+
+# Сторож ловит релиз оригинального OpenChamber и сразу запускает сборку
+# русской версии. Отдельный workflow, а не cron внутри build-ru.yml: таймер
+# проверки и таймер тяжёлой сборки должны жить раздельно, иначе проверка
+# поднималась бы вместе с полной сборкой на всех платформах.
+#
+# GitHub не умеет подписываться на чужие релизы, поэтому — опрос GitHub API.
+# Окно в 10 минут: GitHub умеет откладывать таймеры при высокой нагрузке,
+# поэтому запуск чуть позже расписания — норма, а не сбой. Сборка всё равно
+# стартует по факту обнаружения, а не по расписанию.
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: write
+
+# Один сторож за раз: два параллельных прогона не должны запускать
+# две сборки одного и того же релиза.
+concurrency:
+  group: watch-upstream
+  cancel-in-progress: false
+
+jobs:
+  check-and-dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for a new upstream release
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          UPSTREAM_REPO: 'openchamber/openchamber'
+          BUILD_WORKFLOW: 'build-ru.yml'
+        run: |
+          set -euo pipefail
+
+          upstream_version=$(curl -sS --fail \
+            "https://api.github.com/repos/${UPSTREAM_REPO}/releases/latest" \
+            | jq -r '.tag_name // empty' | sed 's/^v//')
+
+          if [ -z "$upstream_version" ]; then
+            echo "::error::Не удалось прочитать последний релиз ${UPSTREAM_REPO}"
+            exit 1
+          fi
+
+          echo "Апстрим: v${upstream_version}"
+
+          # Последний релиз, который мы уже собрали.
+          published_version=$(gh release list --repo "Gegaremant/OpenChamber_ru" \
+            --limit 1 --json tagName --jq '.[0].tagName // empty' | sed 's/^v//' || true)
+
+          if [ -z "$published_version" ]; then
+            echo "Публикаций не найдено — собираем первую версию v${upstream_version}"
+          elif [ "$published_version" = "$upstream_version" ]; then
+            echo "v${upstream_version} уже собран. Ждём следующего релиза."
+            exit 0
+          else
+            echo "Последний собранный: v${published_version}, апстрим: v${upstream_version}"
+          fi
+
+          # Перестраховка от гонки: если запуск уже в очереди, второй не нужен.
+          if gh run list --repo "Gegaremant/OpenChamber_ru" \
+               --workflow "$BUILD_WORKFLOW" --status in_progress --limit 1 \
+               --json databaseId --jq '.[0].databaseId // empty' | grep -q .; then
+            echo "::warning::Сборка уже выполняется — запуск отложен."
+            exit 0
+          fi
+
+          echo "Запускаю ${BUILD_WORKFLOW} для v${upstream_version}"
+          gh workflow run "$BUILD_WORKFLOW" \
+            --repo "Gegaremant/OpenChamber_ru" \
+            -f version="$upstream_version"
