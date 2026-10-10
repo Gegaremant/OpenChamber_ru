@@ -105,7 +105,7 @@ for (const model of models) {
     const res = await fetch(`${base}/chat/completions`, {
       method: 'POST',
       headers,
-      body: JSON.stringify({ model, temperature: 0.2, messages: [{ role: 'user', content: prompt }] }),
+      body: JSON.stringify({ model, temperature: 0.2, max_tokens: 16384, messages: [{ role: 'user', content: prompt }] }),
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}: ${(await res.text()).slice(0, 200)}`);
     const data = await res.json();
