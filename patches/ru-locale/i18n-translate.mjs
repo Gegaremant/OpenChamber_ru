@@ -119,7 +119,8 @@ for (const model of models) {
     }
     filled = count;
   } catch (e) {
-    failed = e.message;
+    const cause = e.cause && (e.cause.code || e.cause.message || JSON.stringify(e.cause).slice(0, 300));
+    failed = e.message + (cause ? ` (${cause})` : '');
   }
   console.log(`  • модель ${model}: переведено ${filled}/${todo.length}${failed ? ` (ошибка: ${failed})` : ''}`);
   if (filled === 0 && failed) console.warn(`::warning::Модель ${model} не ответила: ${failed}`);
