@@ -88,42 +88,90 @@ const unquotedFix = (v) => String(v).replace(/^'(.*)'$/s, "$1");
 
 // Основная → резервная → запасная: каждая модель переводит только оставшиеся
 // ключи, результаты сливаются. Если модель упала или вернула мусор — пробуем следующую.
+// Перевод идёт порциями (CHUNK ключей на запрос): один гигантский промпт
+// упирается в таймауты прокси/агрегаторов (502/504). Каждая порция — отдельный
+// запрос, на 5xx — ретраи с паузой, упавшую порцию подхватит следующая модель.
 const json = {};
 const covered = () => Object.keys(payload).filter((k) => json[k] && typeof json[k] === 'string' && json[k].trim());
 const uncovered = () => Object.keys(payload).filter((k) => !covered().includes(k));
 
-for (const model of models) {
-  const todo = uncovered();
-  if (!todo.length) break;
-  const sub = {};
-  for (const k of todo) sub[k] = payload[k];
-  const prompt = `Ты — переводчик интерфейса OpenChamber на русский язык. Переведи значения на русский. Сохрани все плейсхолдеры вида {foo} без изменений. Соблюдай терминологию: сессия (не «сеанс»), рабочее дерево (worktree), субагент, MCP-сервер, коммит, ветка, OpenCode/OpenChamber — латиницей, обращение на «вы». Верни ТОЛЬКО JSON-объект с теми же ключами и переведёнными значениями. Не добавляй код-фенсы.\n\n${JSON.stringify(sub, null, 2)}`;
+const buildPrompt = (sub) => `Ты — переводчик интерфейса OpenChamber на русский язык. Переведи значения на русский. Сохрани все плейсхолдеры вида {foo} без изменений. Соблюдай терминологию: сессия (не «сеанс»), рабочее дерево (worktree), субагент, MCP-сервер, коммит, ветка, OpenCode/OpenChamber — латиницей, обращение на «вы». Верни ТОЛЬКО JSON-объект с теми же ключами и переведёнными значениями. Не добавляй код-фенсы.\n\n${JSON.stringify(sub, null, 2)}`;
 
-  let filled = 0;
-  let failed = null;
-  try {
-    const res = await fetch(`${base}/chat/completions`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({ model, temperature: 0.2, max_tokens: 16384, messages: [{ role: 'user', content: prompt }] }),
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}: ${(await res.text()).slice(0, 200)}`);
-    const data = await res.json();
-    const content = data.choices?.[0]?.message?.content || '';
-    const parsed = JSON.parse(content.replace(/```json|```/g, '').trim());
-    let count = 0;
-    for (const k of todo) {
-      const v = parsed[k];
-      const clean = typeof v === 'string' && v.trim() ? unquotedFix(v).trim() : '';
-      if (clean) { json[k] = clean; count++; }
+const CHUNK = 25;       // ключей на один запрос
+const MAX_ATTEMPTS = 3; // попыток на порцию при 5xx/сбоях
+const MAX_ROUNDS = 3;   // раундов добора для ключей, где модель вернула мусор
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// Азиатские и экзотические письменности в русской локали — это мусор от модели
+// (например, случайный иероглиф вместо «фокуса»). Значения с ними не
+// принимаются и уходят на повторный перевод в следующих раундах.
+const BAD_SCRIPT = /[\u0370-\u03FF\u0590-\u05FF\u0600-\u06FF\u0900-\u0DFF\u0E00-\u0E7F\u3040-\u30FF\u3400-\u4DBF\u4E00-\u9FFF\uAC00-\uD7AF]/;
+
+// Раунды: порции + ретраи + добор «грязных» ключей. Если модель вернула
+// значение с мусорными символами, оно не сохраняется и переотправляется в
+// следующем раунде (следующая модель/новая генерация), пока не придёт чистый.
+for (let round = 1; round <= MAX_ROUNDS && uncovered().length > 0; round++) {
+  const beforeRound = uncovered().length;
+
+  for (const model of models) {
+    const todo0 = uncovered();
+    if (!todo0.length) break;
+    let failed = null;
+    let done = 0;
+    let softBreak = false;
+
+    for (let i = 0; i < todo0.length && !softBreak; i += CHUNK) {
+      const chunkKeys = todo0.slice(i, i + CHUNK);
+      const sub = {};
+      for (const k of chunkKeys) sub[k] = payload[k];
+      const prompt = buildPrompt(sub);
+      const nPortion = Math.floor(i / CHUNK) + 1;
+      const nPortions = Math.ceil(todo0.length / CHUNK);
+
+      for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+        try {
+          const res = await fetch(`${base}/chat/completions`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({ model, temperature: 0.2, max_tokens: 16384, messages: [{ role: 'user', content: prompt }] }),
+          });
+          if (!res.ok) throw new Error(`HTTP ${res.status}: ${(await res.text()).slice(0, 200)}`);
+          const data = await res.json();
+          const content = data.choices?.[0]?.message?.content || '';
+          const parsed = JSON.parse(content.replace(/```json|```/g, '').trim());
+          let rejected = 0;
+          for (const k of chunkKeys) {
+            const v = parsed[k];
+            const clean = typeof v === 'string' && v.trim() ? unquotedFix(v).trim() : '';
+            if (!clean) continue;
+            if (BAD_SCRIPT.test(clean)) { rejected++; continue; }
+            json[k] = clean;
+          }
+          done = todo0.length - uncovered().length;
+          console.log(`  • [раунд ${round}] ${model}: порция ${nPortion}/${nPortions} — переведено ${done}/${todo0.length}${rejected ? ` (мусор: ${rejected})` : ''}`);
+          break;
+        } catch (e) {
+          const cause = e.cause && (e.cause.code || e.cause.message || JSON.stringify(e.cause).slice(0, 300));
+          failed = e.message + (cause ? ` (${cause})` : '');
+          if (attempt < MAX_ATTEMPTS) {
+            console.warn(`  • ${model}: порция ${nPortion}/${nPortions}, попытка ${attempt}: ${failed} — повтор через ${attempt * 3}с`);
+            await sleep(attempt * 3000);
+          } else {
+            softBreak = true;
+            console.warn(`  • ${model}: порция ${nPortion}/${nPortions} не переведена после ${MAX_ATTEMPTS} попыток: ${failed}`);
+          }
+        }
+      }
     }
-    filled = count;
-  } catch (e) {
-    const cause = e.cause && (e.cause.code || e.cause.message || JSON.stringify(e.cause).slice(0, 300));
-    failed = e.message + (cause ? ` (${cause})` : '');
+
+    console.log(`  • модель ${model}: переведено ${done}/${todo0.length}${failed ? ` (ошибка: ${failed})` : ''}`);
+    if (done === 0 && failed) console.warn(`::warning::Модель ${model} не ответила: ${failed}`);
   }
-  console.log(`  • модель ${model}: переведено ${filled}/${todo.length}${failed ? ` (ошибка: ${failed})` : ''}`);
-  if (filled === 0 && failed) console.warn(`::warning::Модель ${model} не ответила: ${failed}`);
+
+  if (uncovered().length === beforeRound) {
+    console.warn(`::warning::Раунд ${round}: прогресса нет — прекращаю добор.`);
+    break;
+  }
 }
 
 const unlucky = uncovered();
