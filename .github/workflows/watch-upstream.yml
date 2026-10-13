@@ -38,7 +38,13 @@ jobs:
         run: |
           set -euo pipefail
 
+          # Без токена GitHub-hosted runner бьётся об общий IP-лимит API
+          # (60 запросов/час с public IP) — 403 после первого же всплеска
+          # других раннеров. Неаутентифицированный curl на 02:50 упал именно
+          # так, сторож не запустил сборку. Авторизуемся тем же GITHUB_TOKEN.
           upstream_version=$(curl -sS --fail \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
             "https://api.github.com/repos/${UPSTREAM_REPO}/releases/latest" \
             | jq -r '.tag_name // empty' | sed 's/^v//')
 
