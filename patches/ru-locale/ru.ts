@@ -4110,4 +4110,11 @@ export const dict: Record<I18nKey, string> = {
   'common.relative.minutesAgoCompact': '{count} мин',
   'common.relative.hoursAgoCompact': '{count} ч',
   'common.relative.monthsAgoCompact': '{count} мес',
+  'sessions.scheduledTasks.editor.targetLoadFailed': 'Не удалось загрузить сессии этого проекта.',
+  'sessions.scheduledTasks.editor.targetRetry': 'Повторите попытку',
+  'gitView.header.openRepository': 'Открыть репозиторий на {provider}',
+  'contextRail.configure.reorder': 'Перетащите {label}, чтобы изменить порядок',
+  'contextRail.configure.dragInstructions': 'Нажмите пробел, чтобы подхватить панель, используйте клавиши со стрелками, чтобы переместить её, и нажмите пробел, чтобы отпустить. Нажмите Escape, чтобы отменить.',
+  'contextRail.configure.position': '{label}, позиция {position} из {count}.',
+  'contextRail.configure.dragCancelled': 'Изменение порядка отменено.',
 };
