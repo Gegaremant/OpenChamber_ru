@@ -85,6 +85,8 @@ jobs:
       # Словарь отдаём артефактом: джобы сборки делают checkout на SHA запуска
       # и свежий коммит из main иначе не видят. Артефакт — единственный
       # способ гарантировать, что собирается именно переведённая версия.
+      # Линейные модули (*.i18n.ts) берём все: апстрим периодически добавляет
+      # новые, i18n-translate генерирует для них патчи на лету.
       - name: Publish translated dictionaries
         uses: actions/upload-artifact@v4
         with:
@@ -92,9 +94,7 @@ jobs:
           path: |
             patches/ru-locale/ru.ts
             patches/ru-locale/ru.settings.ts
-            patches/ru-locale/linear-integration.i18n.ts
-            patches/ru-locale/linear-issue-picker.i18n.ts
-            patches/ru-locale/linear-panel.i18n.ts
+            patches/ru-locale/*.i18n.ts
           if-no-files-found: error
 
       - name: Commit translations back to main
@@ -105,9 +105,7 @@ jobs:
           git config user.name "OpenChamber RU bot"
           git config user.email "bot@users.noreply.github.com"
           git add patches/ru-locale/ru.ts patches/ru-locale/ru.settings.ts \
-                  patches/ru-locale/linear-integration.i18n.ts \
-                  patches/ru-locale/linear-issue-picker.i18n.ts \
-                  patches/ru-locale/linear-panel.i18n.ts
+                  patches/ru-locale/*.i18n.ts
           if git diff --cached --quiet; then
             echo "Новых переводов нет — коммит не требуется."
             exit 0
