@@ -4117,4 +4117,12 @@ export const dict: Record<I18nKey, string> = {
   'contextRail.configure.dragInstructions': 'Нажмите пробел, чтобы подхватить панель, используйте клавиши со стрелками, чтобы переместить её, и нажмите пробел, чтобы отпустить. Нажмите Escape, чтобы отменить.',
   'contextRail.configure.position': '{label}, позиция {position} из {count}.',
   'contextRail.configure.dragCancelled': 'Изменение порядка отменено.',
+  'mobile.menu.git': 'Git',
+  'mobile.sessions.footer.more': 'Ещё',
+  'sessions.sidebar.header.displayMode.showPinned': 'Показывать раздел «Закреплённые»',
+  'sessions.sidebar.header.displayMode.detailedZoneRows': 'Подробные строки',
+  'sessions.sidebar.activity.pinnedTitle': 'Закреплённые',
+  'diffView.layout.switchToUnified': 'Переключиться на унифицированный вид',
+  'diffView.layout.switchToSideBySide': 'Переключиться на вид «бок о бок»',
+  'updateDialog.desktopHostInstall': 'Доступна OpenChamber {version}. Обновите приложение на компьютере, где оно запущено.',
 };

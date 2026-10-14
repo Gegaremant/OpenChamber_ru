@@ -1,0 +1,28 @@
+/** Русский блок для project-knowledge.i18n.ts — вставляется в свежий файл апстрима. */
+export const projectKnowledgeI18n = {
+  ru: {
+    'rightSidebar.contextNotesTodo.notes.selectHint': 'Выберите заметку, чтобы прочитать или изменить её.',
+    'rightSidebar.contextNotesTodo.memory.selectHint': 'Выберите запись памяти, чтобы прочитать или изменить её.',
+    'rightSidebar.contextNotesTodo.plans.selectHint': 'Выберите план, чтобы открыть его.',
+    'rightSidebar.contextNotesTodo.notes.actions.back': 'Назад к заметкам',
+    'rightSidebar.contextNotesTodo.memory.actions.back': 'Назад к памяти',
+    'rightSidebar.contextNotesTodo.notes.editorLabel': 'Текст заметки',
+    'rightSidebar.contextNotesTodo.pin.attach': '"Добавить в контекст этой сессии"',
+    'rightSidebar.contextNotesTodo.pin.detach': '"Удалить из контекста этой сессии"',
+    'rightSidebar.contextNotesTodo.pin.attached': 'В контексте сессии',
+    'rightSidebar.contextNotesTodo.actions.more': 'Ещё действия',
+    'rightSidebar.contextNotesTodo.undo': 'Отменить',
+    'rightSidebar.contextNotesTodo.deleted.note': 'Заметка удалена',
+    'rightSidebar.contextNotesTodo.deleted.plan': 'План удалён',
+    'rightSidebar.contextNotesTodo.deleted.memory': 'Запись памяти забыта',
+    'rightSidebar.contextNotesTodo.notes.source.open': 'Открыть сообщение, из которого пришла эта заметка',
+    'rightSidebar.contextNotesTodo.todo.menu.delete': 'Удалить задачу',
+    'rightSidebar.contextNotesTodo.plans.newPlaceholder': 'Название нового плана',
+    'rightSidebar.contextNotesTodo.plans.create': 'Создать план',
+    'rightSidebar.contextNotesTodo.plans.menu.share': 'Переместить в репозиторий',
+    'rightSidebar.contextNotesTodo.plans.menu.makePersonal': 'Переместить в мои планы',
+    'rightSidebar.contextNotesTodo.toast.createPlanFailed': 'Не удалось создать план',
+    'rightSidebar.contextNotesTodo.memory.unseenTitle': 'Новые или изменённые с момента последнего просмотра: {count}',
+    'rightSidebar.contextNotesTodo.search.placeholderInProject': 'Поиск в {project}',
+  },
+};

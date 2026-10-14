@@ -2699,5 +2699,13 @@ export const settingsDict = {
   'settings.openchamber.visual.option.fileTreeSide.left': 'Слева',
   'settings.openchamber.visual.option.fileTreeSide.right': 'Справа',
   'settings.sourceControl.actions.use': 'Использовать',
+  'settings.openchamber.tools.field.agentKnowledgeTool': '"Инструмент знаний проекта"',
+  'settings.openchamber.tools.field.agentKnowledgeToolAria': '"Инструмент знаний проекта"',
+  'settings.openchamber.tools.field.agentKnowledgeToolInfo': '"Агенты работают с теми же элементами, которые вы видите на панели «Знания проекта»."',
+  'settings.openchamber.tools.field.agentKnowledgeToolSummary': '"Разрешите агентам читать и обновлять заметки, задачи и планы проекта."',
+  'settings.openchamber.visual.field.openLinksInBrowserPanel': 'Открывать ссылки во встроенном браузере',
+  'settings.openchamber.visual.field.openLinksInBrowserPanelInfo': 'Ссылки в чате открываются во вкладке браузера рядом с чатом. При Cmd+клике или Ctrl+клике они открываются в браузере по умолчанию.',
+  'settings.openchamber.visual.field.openTrackerLinksOnBoard': 'Открывать задачи и пул-реквесты в OpenChamber',
+  'settings.openchamber.visual.field.openTrackerLinksOnBoardInfo': 'Ссылки на задачи GitHub и GitLab, пул-реквесты и запросы на слияние, а также задачи Linear открываются на доске «Issues and PRs», когда соответствующий проект открыт здесь. При Cmd+клике или Ctrl+клике открывается сама ссылка.',
     ...linearIntegrationI18n.ru,
 } as const;
