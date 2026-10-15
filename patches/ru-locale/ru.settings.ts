@@ -2707,5 +2707,9 @@ export const settingsDict = {
   'settings.openchamber.visual.field.openLinksInBrowserPanelInfo': 'Ссылки в чате открываются во вкладке браузера рядом с чатом. При Cmd+клике или Ctrl+клике они открываются в браузере по умолчанию.',
   'settings.openchamber.visual.field.openTrackerLinksOnBoard': 'Открывать задачи и пул-реквесты в OpenChamber',
   'settings.openchamber.visual.field.openTrackerLinksOnBoardInfo': 'Ссылки на задачи GitHub и GitLab, пул-реквесты и запросы на слияние, а также задачи Linear открываются на доске «Issues and PRs», когда соответствующий проект открыт здесь. При Cmd+клике или Ctrl+клике открывается сама ссылка.',
+  'settings.magicPrompts.sidebar.group.memory': 'Память',
+  'settings.magicPrompts.sidebar.item.memoryTidy': 'Навести порядок',
+  'settings.magicPrompts.page.group.memoryTidy.title': 'Наведение порядка в памяти',
+  'settings.magicPrompts.page.group.memoryTidy.description': 'Промпты, используемые кнопкой «Навести порядок» на панели «Память»: видимое сообщение пользователя + скрытые инструкции, за которыми следует каждая сохранённая запись памяти. Агент удаляет устаревшие записи, объединяет дубликаты, перезаписывает то, что изменилось, и сообщает, что он сделал.',
     ...linearIntegrationI18n.ru,
 } as const;

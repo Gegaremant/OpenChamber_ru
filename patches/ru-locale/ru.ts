@@ -4125,4 +4125,12 @@ export const dict: Record<I18nKey, string> = {
   'diffView.layout.switchToUnified': 'Переключиться на унифицированный вид',
   'diffView.layout.switchToSideBySide': 'Переключиться на вид «бок о бок»',
   'updateDialog.desktopHostInstall': 'Доступна OpenChamber {version}. Обновите приложение на компьютере, где оно запущено.',
+  'mobile.connect.notice.relayLimit': 'Релей отклонил подключение к {label}: слишком много устройств или переподключений. Закройте OpenChamber на другом устройстве или подождите минуту, затем нажмите {label}, чтобы попробовать снова.',
+  'mobile.connect.error.relayLimit': 'Релей отклонил подключение: слишком много устройств или переподключений. Закройте OpenChamber на другом устройстве или подождите минуту, затем попробуйте снова.',
+  'session.newWorktree.toast.branchBackup': 'Ветка {branch} теперь соответствует удалённой. Её предыдущие коммиты сохранены в {backup}.',
+  'desktopHostSwitcher.status.relayLimit': 'Достигнут лимит релея',
+  'desktopHostSwitcher.toast.relayLimit': 'Релей отклонил подключение к «{host}»: слишком много устройств или переподключений. Закройте OpenChamber на другом устройстве или подождите минуту, затем попробуйте снова.',
+  'relayConnection.limitReached.title': 'Релей отклонил подключение',
+  'relayConnection.limitReached.description': 'Слишком много устройств или переподключений для этого экземпляра. Закройте OpenChamber на другом устройстве или подождите минуту, затем попробуйте снова.',
+  'relayConnection.limitReached.retry': 'Попробовать снова',
 };
