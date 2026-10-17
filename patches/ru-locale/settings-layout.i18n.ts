@@ -1,0 +1,28 @@
+/** Русский блок для settings-layout.i18n.ts — вставляется в свежий файл апстрима. */
+export const settingsLayoutI18n = {
+  ru: {
+    'settings.layout.general.desktopApp.title': 'Десктопное приложение',
+    'settings.layout.general.quickAccess.title': 'Быстрый доступ',
+    'settings.layout.general.quickAccess.info': 'Горячие клавиши, которые вызывают OpenChamber из любого приложения, даже когда он работает в фоне.',
+    'settings.layout.general.network.title': 'Пароль и сетевой доступ',
+    'settings.layout.general.files.title': 'Файлы и редактор',
+    'settings.layout.general.terminal.title': 'Терминал',
+    'settings.layout.general.panels.title': 'Панели и ссылки',
+    'settings.layout.chat.tab.messages': 'Сообщения',
+    'settings.layout.chat.tab.composer': 'Редактор сообщений',
+    'settings.layout.chat.tab.assistance': 'Помощь',
+    'settings.layout.chat.section.activity': 'Активность агента',
+    'settings.layout.chat.section.reading': 'Чтение',
+    'settings.layout.chat.section.formatting': 'Форматирование',
+    'settings.layout.chat.section.sending': 'Отправка',
+    'settings.layout.chat.section.draftsAndHistory': 'Черновики и история',
+    'settings.layout.sessions.helperModels.title': 'Вспомогательные модели',
+    'settings.layout.sessions.sidebar.title': 'Боковая панель',
+    'settings.layout.sessions.retention.target': 'Применяется к',
+    'settings.layout.sessions.retention.target.unarchived': 'Неархивированные сессии',
+    'settings.layout.sessions.retention.target.archived': 'Архивированные сессии',
+    'settings.layout.tunnel.section.setup': 'Настройка',
+    'settings.layout.tunnel.section.connection': 'Подключение',
+    'settings.layout.tunnel.section.lifetime': 'Время жизни ссылки',
+  },
+};

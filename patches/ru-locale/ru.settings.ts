@@ -2711,5 +2711,16 @@ export const settingsDict = {
   'settings.magicPrompts.sidebar.item.memoryTidy': 'Навести порядок',
   'settings.magicPrompts.page.group.memoryTidy.title': 'Наведение порядка в памяти',
   'settings.magicPrompts.page.group.memoryTidy.description': 'Промпты, используемые кнопкой «Навести порядок» на панели «Память»: видимое сообщение пользователя + скрытые инструкции, за которыми следует каждая сохранённая запись памяти. Агент удаляет устаревшие записи, объединяет дубликаты, перезаписывает то, что изменилось, и сообщает, что он сделал.',
+  'settings.remoteInstances.clientAuth.relayConflict.title': 'За этот компьютер отвечает другой компьютер',
+  'settings.remoteInstances.clientAuth.relayConflict.description': 'Устройства, добавленные для «Где угодно», переключаются между этим компьютером и другим. Это происходит, когда данные OpenChamber скопированы на второй компьютер и оба запущены.',
+  'settings.remoteInstances.clientAuth.relayConflict.action': 'Отделить этот компьютер',
+  'settings.remoteInstances.clientAuth.relayConflict.confirmTitle': 'Отделить этот компьютер?',
+  'settings.remoteInstances.clientAuth.relayConflict.confirmMessage': 'Устройства, добавленные для «Где угодно», продолжат обращаться к другому компьютеру. Чтобы использовать устройство с этим компьютером, добавьте его здесь снова через «Добавить устройство».
+
+Устройства, добавленные для «Только домашняя сеть», продолжат работать.',
+  'settings.remoteInstances.clientAuth.relayConflict.confirmAction': 'Отделить',
+  'settings.remoteInstances.clientAuth.relayConflict.toast.success': 'Теперь этот компьютер работает отдельно. Добавьте устройства здесь снова, чтобы обращаться к нему откуда угодно.',
+  'settings.remoteInstances.clientAuth.relayConflict.toast.failed': 'Не удалось отделить этот компьютер',
+  'settings.github.page.flow.autoRefresh': '(автообновление)',
     ...linearIntegrationI18n.ru,
 } as const;
