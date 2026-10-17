@@ -2722,5 +2722,6 @@ export const settingsDict = {
   'settings.remoteInstances.clientAuth.relayConflict.toast.success': 'Теперь этот компьютер работает отдельно. Добавьте устройства здесь снова, чтобы обращаться к нему откуда угодно.',
   'settings.remoteInstances.clientAuth.relayConflict.toast.failed': 'Не удалось отделить этот компьютер',
   'settings.github.page.flow.autoRefresh': '(автообновление)',
+  'settings.remoteInstances.clientAuth.relayConflict.confirmMessage': 'Устройства, добавленные вами для "Везде", продолжат подключаться к другому компьютеру. Чтобы использовать одно из них с этим компьютером, добавьте его здесь заново с помощью "Добавить устройство".\\n\\nУстройства, добавленные для "Только домашняя сеть", продолжат работать.',
     ...linearIntegrationI18n.ru,
 } as const;
