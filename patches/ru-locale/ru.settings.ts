@@ -2715,13 +2715,19 @@ export const settingsDict = {
   'settings.remoteInstances.clientAuth.relayConflict.description': 'Устройства, добавленные для «Где угодно», переключаются между этим компьютером и другим. Это происходит, когда данные OpenChamber скопированы на второй компьютер и оба запущены.',
   'settings.remoteInstances.clientAuth.relayConflict.action': 'Отделить этот компьютер',
   'settings.remoteInstances.clientAuth.relayConflict.confirmTitle': 'Отделить этот компьютер?',
-  'settings.remoteInstances.clientAuth.relayConflict.confirmMessage': 'Устройства, добавленные для «Где угодно», продолжат обращаться к другому компьютеру. Чтобы использовать устройство с этим компьютером, добавьте его здесь снова через «Добавить устройство».
-
-Устройства, добавленные для «Только домашняя сеть», продолжат работать.',
+  'settings.remoteInstances.clientAuth.relayConflict.confirmMessage': 'Устройства, добавленные для «Где угодно», продолжат обращаться к другому компьютеру. Чтобы использовать устройство с этим компьютером, добавьте его здесь снова через «Добавить устройство»\\n\\nУстройства, добавленные для «Только домашняя сеть», продолжат работать.',
   'settings.remoteInstances.clientAuth.relayConflict.confirmAction': 'Отделить',
   'settings.remoteInstances.clientAuth.relayConflict.toast.success': 'Теперь этот компьютер работает отдельно. Добавьте устройства здесь снова, чтобы обращаться к нему откуда угодно.',
   'settings.remoteInstances.clientAuth.relayConflict.toast.failed': 'Не удалось отделить этот компьютер',
   'settings.github.page.flow.autoRefresh': '(автообновление)',
   'settings.remoteInstances.clientAuth.relayConflict.confirmMessage': 'Устройства, добавленные вами для "Везде", продолжат подключаться к другому компьютеру. Чтобы использовать одно из них с этим компьютером, добавьте его здесь заново с помощью "Добавить устройство".\\n\\nУстройства, добавленные для "Только домашняя сеть", продолжат работать.',
     ...linearIntegrationI18n.ru,
+  'settings.remoteInstances.clientAuth.relayConflict.title': 'Другой компьютер отвечает за этот',
+  'settings.remoteInstances.clientAuth.relayConflict.description': 'Устройства, добавленные для «Где угодно», переключаются между этим и другим компьютером. Это происходит, если данные OpenChamber были скопированы на второй компьютер и оба работают.',
+  'settings.remoteInstances.clientAuth.relayConflict.action': 'Отделить этот компьютер',
+  'settings.remoteInstances.clientAuth.relayConflict.confirmTitle': 'Отделить этот компьютер?',
+  'settings.remoteInstances.clientAuth.relayConflict.confirmMessage': 'Устройства, добавленные для «Где угодно», продолжат обращаться к другому компьютеру. Чтобы использовать устройство с этим компьютером, добавьте его здесь снова через «Добавить устройство»\\n\\nУстройства, добавленные для «Только домашняя сеть», продолжат работать.',
+  'settings.remoteInstances.clientAuth.relayConflict.confirmAction': 'Отделить',
+  'settings.remoteInstances.clientAuth.relayConflict.toast.success': 'Этот компьютер теперь отделён. Чтобы подключаться к нему из любой точки, добавьте устройства снова.',
+  'settings.remoteInstances.clientAuth.relayConflict.toast.failed': 'Не удалось отделить этот компьютер',
 } as const;
