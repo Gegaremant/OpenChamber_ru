@@ -236,7 +236,7 @@ for (const f of linearFiles) {
       console.warn(`  ! нет перевода для ${k}`);
       continue;
     }
-    const clean = unquotedFix(v).trim().replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    const clean = unquotedFix(v).trim().replace(/\\/g, '\\\\').replace(/\n/g, '\\\\n').replace(/\r/g, '\\\\r').replace(/\t/g, '\\\\t').replace(/'/g, "\\'");
     lines.push(`    '${k}': '${clean}',`);
   }
   lines.push(`  },`);
@@ -259,7 +259,7 @@ if (Object.keys(payload).length) {
         console.warn(`  ! нет перевода для ${k}`);
         continue;
       }
-      const clean = unquotedFix(v).trim().replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+      const clean = unquotedFix(v).trim().replace(/\\/g, '\\\\').replace(/\n/g, '\\\\n').replace(/\r/g, '\\\\r').replace(/\t/g, '\\\\t').replace(/'/g, "\\'");
       lines.push(`  '${k}': '${clean}',`);
     }
     if (!lines.length) continue;
