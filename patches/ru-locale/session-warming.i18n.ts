@@ -1,0 +1,27 @@
+/** Русский блок для session-warming.i18n.ts — вставляется в свежий файл апстрима. */
+export const sessionWarmingI18n = {
+  ru: {
+    'settings.openchamber.defaults.sessionWarming.aria': 'Как поддерживается активность неактивных сессий',
+    'settings.openchamber.defaults.sessionWarming.off': 'Выкл.',
+    'settings.openchamber.defaults.sessionWarming.all': 'Все сессии',
+    'settings.openchamber.defaults.sessionWarming.session': 'Выбранные сессии',
+    'settings.openchamber.defaults.sessionWarming.info': 'Некоторые провайдеры забывают кэшированный контекст беседы после нескольких минут тишины, поэтому следующее сообщение обрабатывается медленнее и стоит дороже. Сессия с поддержанием активности получает крошечный запрос "OK" каждые 4 минуты, пока простаивает, и каждый такой запрос тарифицируется как небольшой. Все сессии: OpenCode поддерживает активность каждой сессии. Выбранные сессии: включите это для отдельной сессии в меню сессии или рядом с разделом «Контекст». Ниже выберите, как долго сессия остаётся активной после каждого ответа.',
+    'settings.openchamber.defaults.sessionWarming.duration': 'Поддерживать активность в течение',
+    'settings.openchamber.defaults.sessionWarming.durationAria': 'Как долго сессия остаётся активной после ответа',
+    'settings.openchamber.defaults.sessionWarming.duration.30': '30 мин',
+    'settings.openchamber.defaults.sessionWarming.duration.60': '1 час',
+    'settings.openchamber.defaults.sessionWarming.duration.120': '2 часа',
+    'settings.openchamber.defaults.sessionWarming.duration.180': '3 часа',
+    'sessions.sidebar.session.menu.keepWarm': 'Поддерживать активность',
+    'sessions.sidebar.session.menu.stopWarm': 'Остановить поддержание активности',
+    'sessions.sidebar.session.menuHint.keepWarm': 'Сохраняет кэшированный контекст этой сессии после каждого ответа с помощью крошечного запроса каждые 4 минуты. Длительность задаётся в настройках.',
+    'sessions.sidebar.session.menuHint.stopWarm': 'Останавливает запросы поддержания активности для этой сессии.',
+    'sessions.warming.toggleFailed': 'Не удалось изменить поддержание активности для этой сессии',
+    'chat.workStatus.warming.turnOn': 'Поддерживать активность этой сессии',
+    'chat.workStatus.warming.turnOff': 'Остановить поддержание активности этой сессии',
+    'chat.workStatus.warming.off': 'Активность не поддерживается. Включите это, чтобы сохранять кэшированный контекст после каждого ответа.',
+    'chat.workStatus.warming.remaining': 'Активность поддерживается ещё {time}',
+    'chat.workStatus.warming.waiting': 'Активность начнёт поддерживаться после завершения ответа',
+    'chat.workStatus.warming.expired': 'Время поддержания активности истекло. Оно возобновится после следующего ответа.',
+  },
+};
