@@ -13,5 +13,7 @@ export const extensionCatalogI18n = {
     'settings.integrations.extensionCatalog.dialog.remove.description': 'Убрать {name} из этого OpenChamber? Ваши файлы останутся как есть.',
     'settings.integrations.extensionCatalog.toast.enabled': '{name} включено',
     'settings.integrations.extensionCatalog.toast.enableFailed': 'Не удалось включить {name}',
+    'settings.integrations.extensionCatalog.resourceMonitor.name': 'Монитор ресурсов',
+    'settings.integrations.extensionCatalog.resourceMonitor.description': 'Процессор и память вашего компьютера, OpenChamber и dev-серверов.',
   },
 } as const;

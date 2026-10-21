@@ -50,8 +50,29 @@ echo "[1/5] Копируем файлы русской локали..."
 mkdir -p packages/ui/src/lib/i18n/messages
 cp "$SCRIPT_DIR/ru.ts" packages/ui/src/lib/i18n/messages/ru.ts
 cp "$SCRIPT_DIR/ru.settings.ts" packages/ui/src/lib/i18n/messages/ru.settings.ts
-echo "  ✓ ru.ts скопирован"
-echo "  ✓ ru.settings.ts скопирован"
+# Проверяем РОВНО два скопированных файла, а не весь каталог: соседние *.ts
+# апстрима (словари и *.i18n.test.ts) синтаксически валидны, и слепой append
+# "} as const;" в каждый файл ломал тесты (TS1128/TS1434 пачкой).
+# Хвост "};", а не "} as const;", тоже валиден: ru.ts типизирован явно
+# (Record<I18nKey, string>), as const ему не нужен.
+MSG_DIR="packages/ui/src/lib/i18n/messages"
+for f in "$MSG_DIR/ru.ts" "$MSG_DIR/ru.settings.ts"; do
+  last="$(tail -n 1 "$f")"
+  case "$last" in
+    "} as const;"|"};")
+      echo "  ✓ $(basename "$f"): хвост ок";;
+    *)
+      echo "  ✗ $(basename "$f") заканчивается на: '$last'"
+      echo "    Ожидается '} as const;' или '};'. Правь patches/ru-locale, не результат сборки."
+      VERIFY_FAILED=1;;
+  esac
+  # Трансляция ловит то, чего grep хвоста не видит: обрубленный объект,
+  # дубль ключа, битый импорт.
+  if ! bun build "$f" >/dev/null 2>&1; then
+    echo "  ✗ $(basename "$f") не транслируется bun'ом — см. bun build $(basename "$f")"
+    VERIFY_FAILED=1
+  fi
+done
 
 # ============================================================
 # 2. runtime.ts — добавляем 'ru' в тип, массив, лейблы и нормализацию
@@ -293,8 +314,24 @@ for intfile in "${INTEGRATION_FILES[@]}"; do
     const block = src.match(/^([ \t]*)ru: \{[\s\S]*?^\1\},\n/m);
     if (!block) { console.error('блок ru не разобран в ' + source); process.exit(1); }
     const out = fs.readFileSync(target, 'utf8');
-    if (/^[ \t]*ru: \{/m.test(out)) { process.exit(0); }
-    const close = out.lastIndexOf('} as const;');
+    // Блок уже есть: если он совпадает с донором — ничего не делаем;
+    // если донор обновился (дописались новые ключи) — заменяем старый блок
+    // свежим. Иначе перепрогон молча оставлял устаревший ru-блок в дереве.
+    const cur = out.match(/^([ \t]*)ru: \{[\s\S]*?^\1\},\n/m);
+    if (cur) {
+      if (cur[0] === block[0]) process.exit(0);
+      const updated = out.slice(0, cur.index) + block[0] + out.slice(cur.index + cur[0].length);
+      fs.writeFileSync(target, updated);
+      console.log('обновлён по донору');
+      process.exit(0);
+    }
+    // Якорь для вставки — последний закрывающий тег объекта. Обычно это
+    // as const, но апстрим не единообразен: diff-find.i18n.ts объявляет
+    // обычный объект и закрывается простым брекетом с точкой с запятой.
+    // В комментариях внутри node -e кавычек нет: bash их распарсит как
+    // свою строку и порежет JS.
+    let close = out.lastIndexOf('} as const;');
+    if (close < 0) close = out.lastIndexOf('};');
     if (close < 0) { console.error('не найден закрывающий } as const;'); process.exit(1); }
     const next = out.slice(0, close) + block[0] + out.slice(close);
     const count = s => (s.match(/^[ \t]*[A-Za-z-]+: \{/gm) || []).length;

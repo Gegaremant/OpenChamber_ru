@@ -17,14 +17,17 @@ const exists = (p) => fs.existsSync(path.join(messagesDir, p));
 const IGNORED = new Set(['onboarding.localSetup.windows.stepInstallWslSuffix']);
 
 // Все ключи-строки в тексте (плоский словарь; ключ объекта локали отбрасывается).
+// Кавычки — и одинарные, и двойные: апстрим их мешает (opencodeCompatibility.*
+// в en.ts — в двойных), и слепой чек «только одинарные» пропускал 26 ключей
+// как проверки, так и tsc.
 function stringKeys(text) {
   const out = [];
-  const re = /^[\t ]*'([\w.]+)'\s*:/gm;
+  const re = /^[\t ]*(['"])([-\w.]+)\1\s*:/gm;
   let m;
   while ((m = re.exec(text))) {
     const rest = text.slice(re.lastIndex).replace(/^\s*/, '');
     if (rest[0] === '{') continue; // вложенный объект (блок локали)
-    out.push(m[1]);
+    out.push(m[2]);
   }
   return out;
 }
@@ -99,11 +102,14 @@ for (const { en, ru, label } of [
   if (!exists(en)) { console.log(`  — ${label}: нет ${en}`); continue; }
   hasMissing |= checkFlat(en, ru, label);
 }
-for (const { file, label } of [
-  { file: 'linear-integration.i18n.ts', label: 'linear-integration' },
-  { file: 'linear-issue-picker.i18n.ts', label: 'linear-issue-picker' },
-  { file: 'linear-panel.i18n.ts', label: 'linear-panel' },
-]) {
+// Список модулей снимаем с диска, а не держим хардкодом: захардкоженные
+// linear-* покрывали 3 модуля из 30+ апстрима, и новые модули (html-render,
+// usage-stats, providers…) обходились проверки стороной — накопили сотни
+// непереведённых ключей, которые проявились только на tsc.
+for (const file of fs.readdirSync(messagesDir)
+  .filter((f) => /\.i18n\.ts$/.test(f))
+  .sort()) {
+  const label = file.replace(/\.i18n\.ts$/, '');
   if (!exists(file)) { console.log(`  — ${label}: нет ${file}`); continue; }
   hasMissing |= checkLinear(file, label);
 }

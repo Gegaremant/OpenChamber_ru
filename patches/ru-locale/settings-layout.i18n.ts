@@ -24,5 +24,8 @@ export const settingsLayoutI18n = {
     'settings.layout.tunnel.section.setup': 'Настройка',
     'settings.layout.tunnel.section.connection': 'Подключение',
     'settings.layout.tunnel.section.lifetime': 'Время жизни ссылки',
+    'settings.layout.general.mobileTabs.title': 'Вкладки выдвижной панели',
+    'settings.layout.general.mobileTabs.info': 'Вкладки панели, которая выдвигается справа. Удержите вкладку здесь или в панели, чтобы переставить её. Скрытая вкладка всё равно откроется, когда её запросят — например, при изменении файла в чате.',
+    'settings.layout.general.mobileTabs.dragInstructions': 'Нажмите пробел, чтобы взять вкладку, стрелками переместите её и снова нажмите пробел, чтобы положить. Escape — отмена.',
   },
 };

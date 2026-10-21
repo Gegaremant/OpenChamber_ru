@@ -24,5 +24,12 @@ export const projectKnowledgeI18n = {
     'rightSidebar.contextNotesTodo.toast.createPlanFailed': 'Не удалось создать план',
     'rightSidebar.contextNotesTodo.memory.unseenTitle': 'Новые или изменённые с момента последнего просмотра: {count}',
     'rightSidebar.contextNotesTodo.search.placeholderInProject': 'Поиск в {project}',
+    'rightSidebar.contextNotesTodo.memory.tidy.action': 'Навести порядок',
+    'rightSidebar.contextNotesTodo.memory.tidy.sessionTitle': 'Наведение порядка в памяти',
+    'rightSidebar.contextNotesTodo.memory.tidy.noModel': 'Нет модели для наведения порядка. Выберите модель по умолчанию в «Настройках».',
+    'rightSidebar.contextNotesTodo.memory.tidy.failed': 'Не удалось запустить наведение порядка в памяти.',
+    'rightSidebar.contextNotesTodo.plans.progress.done': 'Готово',
+    'rightSidebar.contextNotesTodo.plans.progress.title': 'Выполнено {done} из {total} шагов',
+    'rightSidebar.contextNotesTodo.plans.session.open': 'Открыть сессию, работающую над этим планом',
   },
 };

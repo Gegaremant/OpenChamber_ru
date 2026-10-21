@@ -1,0 +1,104 @@
+@@MODULE integrations-catalog.i18n.ts
+integrationsCatalog.entry.microsoft-learn.description = Search the official Microsoft documentation
+@@MODULE integrations-catalog.i18n.ts
+integrationsCatalog.entry.azure-devops.description = Work items, pull requests, builds and test plans for your Azure DevOps organization
+@@MODULE integrations-catalog.i18n.ts
+integrationsCatalog.entry.mcp-toolbox.description = Ready-made database tools for Postgres, MySQL and SQL Server
+@@MODULE integrations-catalog.i18n.ts
+integrationsCatalog.entry.openai-pdf.description = Read PDFs with the official OpenAI pdf skill
+@@MODULE integrations-catalog.i18n.ts
+integrationsCatalog.entry.langfuse-plugin.description = Send OpenCode session traces to Langfuse
+@@MODULE integrations-catalog.i18n.ts
+integrationsCatalog.entry.langsmith-plugin.description = Trace OpenCode sessions to LangSmith
+@@MODULE integrations-catalog.i18n.ts
+integrationsCatalog.entry.incident-io.description = Investigate and manage incidents in incident.io
+@@MODULE integrations-catalog.i18n.ts
+integrationsCatalog.entry.incident-io.details = Connect incident.io so the agent can look up incidents and their timelines, check who is on call, and help write updates and follow-ups.
+@@MODULE integrations-catalog.i18n.ts
+integrationsCatalog.entry.microsoft-learn.details = Connect Microsoft Learn so the agent can search the official Microsoft documentation and cite what it finds.
+@@MODULE integrations-catalog.i18n.ts
+integrationsCatalog.entry.azure-devops.details = Install Azure DevOps so the agent can read and update work items, review pull requests, and check builds and test plans for your organization.
+@@MODULE integrations-catalog.i18n.ts
+integrationsCatalog.entry.mcp-toolbox.details = Install MCP Toolbox so the agent gets ready-made, permission-aware tools for your Postgres, MySQL or SQL Server database.
+@@MODULE integrations-catalog.i18n.ts
+integrationsCatalog.entry.openai-pdf.details = Install the OpenAI pdf skill so the agent can extract text and tables from PDF files and answer questions about them.
+@@MODULE integrations-catalog.i18n.ts
+integrationsCatalog.entry.langfuse-plugin.details = Install the Langfuse plugin so every OpenCode session sends its traces and costs to your Langfuse project.
+@@MODULE integrations-catalog.i18n.ts
+integrationsCatalog.entry.langsmith-plugin.details = Install the LangSmith plugin so OpenCode sessions trace their runs to LangSmith for review.
+@@MODULE integrations-catalog.i18n.ts
+integrationsCatalog.entry.process-street.description = Run checklists and workflows in Process Street
+@@MODULE integrations-catalog.i18n.ts
+integrationsCatalog.entry.cal-com.description = Manage bookings, event types and availability in Cal.com
+@@MODULE integrations-catalog.i18n.ts
+integrationsCatalog.entry.read-ai.description = Use meeting summaries and action items from Read AI
+@@MODULE integrations-catalog.i18n.ts
+integrationsCatalog.entry.apollo-graphos.description = Search Apollo docs and work with GraphOS schemas
+@@MODULE integrations-catalog.i18n.ts
+integrationsCatalog.entry.mermaid-chart.description = Check and render Mermaid diagrams
+@@MODULE integrations-catalog.i18n.ts
+integrationsCatalog.entry.magic-patterns.description = Iterate on UI designs in Magic Patterns
+@@MODULE integrations-catalog.i18n.ts
+integrationsCatalog.entry.pg-aiguide.description = Search Postgres documentation and best practices
+@@MODULE integrations-catalog.i18n.ts
+integrationsCatalog.entry.new-relic.description = Query telemetry and alerts in New Relic
+@@MODULE integrations-catalog.i18n.ts
+integrationsCatalog.entry.better-stack.description = Check uptime, logs and incidents in Better Stack
+@@MODULE integrations-catalog.i18n.ts
+integrationsCatalog.entry.browser-use.description = Run browser tasks in the cloud with Browser Use
+@@MODULE integrations-catalog.i18n.ts
+integrationsCatalog.entry.chroma-package-search.description = Search the source code of open-source packages
+@@MODULE integrations-catalog.i18n.ts
+integrationsCatalog.entry.day-ai.description = Ask your Day AI CRM about customers and deals
+@@MODULE integrations-catalog.i18n.ts
+integrationsCatalog.entry.process-street.details = Connect Process Street so the agent can inspect workflows and their runs, check task status, fill in form fields, start new runs and complete tasks.
+@@MODULE integrations-catalog.i18n.ts
+integrationsCatalog.entry.cal-com.details = Connect Cal.com so the agent can list and reschedule bookings, edit event types and booking links, and check your availability.
+@@MODULE integrations-catalog.i18n.ts
+integrationsCatalog.entry.read-ai.details = Connect Read AI so the agent can read meeting summaries, transcripts, action items and key questions.
+@@MODULE integrations-catalog.i18n.ts
+integrationsCatalog.entry.apollo-graphos.details = Give the agent Apollo documentation search, the Connectors specification and GraphOS tools for schemas, checks and launches. Docs search needs no account.
+@@MODULE integrations-catalog.i18n.ts
+integrationsCatalog.entry.mermaid-chart.details = Give the agent a Mermaid validator and renderer, so diagrams it writes are checked and drawn as SVG. Needs no account.
+@@MODULE integrations-catalog.i18n.ts
+integrationsCatalog.entry.magic-patterns.details = Connect Magic Patterns so the agent can create and refine frontend designs and prototypes with you.
+@@MODULE integrations-catalog.i18n.ts
+integrationsCatalog.entry.pg-aiguide.details = Give the agent PostgreSQL documentation and Postgres skills from Tiger Data, so the SQL and schemas it writes follow good practice. Needs no account.
+@@MODULE integrations-catalog.i18n.ts
+integrationsCatalog.entry.new-relic.details = Connect New Relic so the agent can run NRQL queries, look at entities and alerts, and investigate incidents. Comes with New Relic skills for root-causing APM errors, writing NRQL and finding traces.
+@@MODULE integrations-catalog.i18n.ts
+integrationsCatalog.entry.better-stack.details = Connect Better Stack so the agent can check monitors and incidents, query logs and look at errors.
+@@MODULE integrations-catalog.i18n.ts
+integrationsCatalog.entry.browser-use.details = Connect Browser Use with an API key so the agent can hand a task to a cloud browser agent and follow its progress.
+@@MODULE integrations-catalog.i18n.ts
+integrationsCatalog.entry.chroma-package-search.details = Connect Chroma Package Search with an API key so the agent can grep and read the source of npm, PyPI, crates and other packages your code depends on.
+@@MODULE integrations-catalog.i18n.ts
+integrationsCatalog.entry.day-ai.details = Connect Day AI so the agent can draw on the CRM records Day AI builds from your emails, chats and meetings.
+@@MODULE integrations-catalog.i18n.ts
+integrationsCatalog.entry.resource-monitor.description = Watch CPU and memory of your machine, OpenChamber and dev servers
+@@MODULE integrations-catalog.i18n.ts
+integrationsCatalog.entry.resource-monitor.details = Install the Resource Monitor extension for a panel with live CPU and memory of your machine, OpenChamber, OpenCode and the dev servers they started, and a Stop button for runaway commands. Works on web and desktop.
+@@MODULE integrations-catalog.i18n.ts
+integrationsCatalog.entry.opencode-claude.description = Use your Claude Pro or Max plan through the Claude Code CLI
+@@MODULE integrations-catalog.i18n.ts
+integrationsCatalog.entry.opencode-claude.details = Install the plugin to get a Claude Code provider in OpenCode. Requests run through the official Claude Agent SDK and the claude CLI on your machine, so no API key is needed; usage counts against your Claude plan limits.
+@@MODULE integrations-catalog.i18n.ts
+integrationsCatalog.entry.opencode-search-providers.description = Web search with SearXNG, Brave Search, Kagi, Perplexity, Linkup and Serper
+@@MODULE integrations-catalog.i18n.ts
+integrationsCatalog.entry.opencode-search-providers.details = Adds six providers to OpenCode\'s built-in web search: your own SearXNG server, Brave Search, Kagi, Perplexity Search, Linkup and Serper. After installing, add a key, or the address of your SearXNG server, in Settings → Web search, and the provider joins the search choices.
+@@MODULE main
+gitView.operation.state.outcome-unknown = Outcome unknown
+@@MODULE main
+gitView.hydration.status.authorization-required = Authorization required
+@@MODULE main
+gitView.hydration.status.client-missing = Git LFS not installed
+@@MODULE main
+gitView.hydration.status.not-needed = Not needed
+@@MODULE main
+gitView.contributor.destination.contributor-fork = Contributor fork
+@@MODULE main
+gitView.contributor.destination.own-fork = Your fork
+@@MODULE main
+gitView.contributor.destination.bound-repository = This repository
+@@MODULE settings
+settings.providers.page.custom.discovery.source.provider-api = Filled in from the provider

@@ -18,5 +18,7 @@ export const fileArtifactsI18n = {
     'filesView.artifact.binary.title': 'Предпросмотр для этого файла недоступен',
     'filesView.artifact.binary.description': 'OpenChamber не умеет читать файлы этого типа. Скачайте его, чтобы открыть в другом приложении.',
     'filesView.artifact.binary.descriptionWithType': 'OpenChamber не умеет читать файлы {extension}. Скачайте его, чтобы открыть в другом приложении.',
+    'filesView.artifact.image.previous': 'Предыдущее изображение: {name}',
+    'filesView.artifact.image.next': 'Следующее изображение: {name}',
   },
 } as const;

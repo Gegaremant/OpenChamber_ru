@@ -62,7 +62,11 @@ function sync(target, source, label) {
 
   const spreads = [];
   for (const line of src.split('\n')) {
-    const m = line.match(/^(\s*)\.\.\.(\w+?)(?:\.en)?,\s*$/);
+    // Апстрим пишет спреды максимум тремя формами: `...x,`, `...x.en,`
+    // и с v2.5 `...x['en'],` (diff-find). Bracket-форма поначалу не
+    // матчилась — спред diffFind терялся, у ru.ts не хватало ключей, и tsc
+    // падал на Record<I18nKey, string>. Матчим все три.
+    const m = line.match(/^(\s*)\.\.\.(\w+?)(?:\['en'\])?(?:\.en)?,\s*$/);
     if (!m) continue;
     const [, indent, name] = m;
     if (name === 'settingsDict') {
