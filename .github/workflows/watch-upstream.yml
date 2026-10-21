@@ -61,9 +61,19 @@ jobs:
 
           if [ -z "$published_version" ]; then
             echo "Публикаций не найдено — собираем первую версию v${upstream_version}"
-          elif [ "$published_version" = "$upstream_version" ]; then
-            echo "v${upstream_version} уже собран. Ждём следующего релиза."
-            exit 0
+          if [ "$published_version" = "$upstream_version" ]; then
+            # Релиз мог остаться ПУСТЫМ: create-release публикует его раньше
+            # build-джоб, и если упаковка упала (ripgrep 2026-10-21), тег есть,
+            # артефактов нет. Такой релиз считаем недособранным — иначе сторож
+            # навсегда решает «уже собран» и слепнет до следующего апстрима.
+            asset_count=$(gh release view "v${upstream_version}" \
+              --repo "Gegaremant/OpenChamber_ru" \
+              --json assets --jq '.assets | length' || echo 0)
+            if [ "${asset_count:-0}" -gt 0 ]; then
+              echo "v${upstream_version} уже собран (${asset_count} артефактов). Ждём следующего релиза."
+              exit 0
+            fi
+            echo "::warning::релиз v${upstream_version} пуст (${asset_count} артефактов) — пересобираем."
           else
             echo "Последний собранный: v${published_version}, апстрим: v${upstream_version}"
           fi
