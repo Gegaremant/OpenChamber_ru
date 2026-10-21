@@ -67,10 +67,16 @@ for f in "$MSG_DIR/ru.ts" "$MSG_DIR/ru.settings.ts"; do
       VERIFY_FAILED=1;;
   esac
   # Трансляция ловит то, чего grep хвоста не видит: обрубленный объект,
-  # дубль ключа, битый импорт.
-  if ! bun build "$f" >/dev/null 2>&1; then
-    echo "  ✗ $(basename "$f") не транслируется bun'ом — см. bun build $(basename "$f")"
-    VERIFY_FAILED=1
+  # дубль ключа, битый импорт. На раннере шаг применяется ДО setup-bun —
+  # если bun нет в PATH, чек пропускается: окончательно всё проверит tsc
+  # на сборке, ошибки туда дойдут и видео-формат не сломают.
+  if command -v bun >/dev/null 2>&1; then
+    if ! bun build "$f" >/dev/null 2>&1; then
+      echo "  ✗ $(basename "$f") не транслируется bun'ом — см. bun build $(basename "$f")"
+      VERIFY_FAILED=1
+    fi
+  else
+    echo "  → bun не установлен (проверка трансляции отложена до tsc)"
   fi
 done
 
