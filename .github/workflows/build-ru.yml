@@ -225,6 +225,9 @@ jobs:
           set -euo pipefail
           bun run build:web-assets
           bun run prepare:opencode-cli
+          # C 2.5.0 апстрим упаковывает ripgrep внутрь ресурсов и electron-builder
+          # валит сборку, не найдя resources/ripgrep/rg («run prepare:ripgrep»).
+          bun run prepare:ripgrep
           bun run bundle:main
           bun run rebuild:native
           bunx electron-builder --linux --x64 --publish=never
@@ -299,6 +302,9 @@ jobs:
           set -euo pipefail
           bun run build:web-assets
           bun run prepare:opencode-cli
+          # C 2.5.0 апстрим упаковывает ripgrep внутрь ресурсов и electron-builder
+          # валит сборку, не найдя resources/ripgrep/rg («run prepare:ripgrep»).
+          bun run prepare:ripgrep
           bun run bundle:main
           bun run rebuild:native
           bunx electron-builder --win nsis --x64 --publish=never
@@ -370,6 +376,9 @@ jobs:
           set -euo pipefail
           bun run build:web-assets
           bun run prepare:opencode-cli
+          # C 2.5.0 апстрим упаковывает ripgrep внутрь ресурсов и electron-builder
+          # валит сборку, не найдя resources/ripgrep/rg («run prepare:ripgrep»).
+          bun run prepare:ripgrep
           bun run bundle:main
           bun run rebuild:native
           bunx electron-builder --mac --x64 --publish=never \
