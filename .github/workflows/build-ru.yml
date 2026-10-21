@@ -97,6 +97,36 @@ jobs:
             patches/ru-locale/*.i18n.ts
           if-no-files-found: error
 
+      # README держит «Актуальная версия» и ссылки на скачивание. Раньше они
+      # правились руками и отставали от релизов. Синхронизируем на каждый
+      # релиз здесь; ссылки оживают, как только create-release опубликует тег.
+      - name: Sync README version
+        env:
+          VERSION: ${{ needs.check-upstream.outputs.new_version }}
+        run: |
+          set -euo pipefail
+          node patches/ru-locale/readme-sync.mjs "$VERSION" README.md
+          git config user.name "OpenChamber RU bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add README.md
+          if git diff --cached --quiet; then
+            echo "README уже на v$VERSION — коммит не требуется."
+            exit 0
+          fi
+          git commit -m "docs: README — актуальная версия v$VERSION"
+          # Тот же сценарий гонки, что и у коммита переводов: rebase с повторами,
+          # но финальную неудачу не молчим и не роняем релиз.
+          for attempt in 1 2 3 4 5; do
+            if git pull --rebase origin main && git push origin HEAD:main; then
+              echo "README запушен с попытки $attempt."
+              exit 0
+            fi
+            echo "::warning::push README не удался (попытка $attempt), пробуем снова"
+            sleep $((attempt * 10))
+          done
+          echo "::error::Не удалось запушить README после 5 попыток."
+          exit 0
+
       - name: Commit translations back to main
         env:
           VERSION: ${{ needs.check-upstream.outputs.new_version }}
