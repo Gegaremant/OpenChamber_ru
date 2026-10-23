@@ -40,6 +40,10 @@ jobs:
 
       - name: Check for new upstream release
         id: check
+        env:
+          # С токеном: анонимный лимит 60 запросов/час ловится руннером
+          # постоянно (2026-10-22 16:33 — именно так скипнулась сборка).
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           if [[ -n "${{ github.event.inputs.version }}" ]]; then
             echo "new_version=${{ github.event.inputs.version }}" >> "$GITHUB_OUTPUT"
@@ -49,7 +53,9 @@ jobs:
             echo "new_version=$TAG_VERSION" >> "$GITHUB_OUTPUT"
             echo "should_build=true" >> "$GITHUB_OUTPUT"
           else
-            UPSTREAM_VERSION=$(curl -s https://api.github.com/repos/openchamber/openchamber/releases/latest | jq -r '.tag_name' | sed 's/^v//')
+            UPSTREAM_VERSION=$(curl -sS -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+              https://api.github.com/repos/openchamber/openchamber/releases/latest \
+              | jq -r '.tag_name' | sed 's/^v//')
             CURRENT_TAG=$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//' || echo "0.0.0")
 
             if [ "$UPSTREAM_VERSION" != "$CURRENT_TAG" ] && [ "$UPSTREAM_VERSION" != "null" ]; then
