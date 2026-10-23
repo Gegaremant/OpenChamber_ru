@@ -61,7 +61,7 @@ jobs:
 
           if [ -z "$published_version" ]; then
             echo "Публикаций не найдено — собираем первую версию v${upstream_version}"
-          if [ "$published_version" = "$upstream_version" ]; then
+          elif [ "$published_version" = "$upstream_version" ]; then
             # Релиз мог остаться ПУСТЫМ: create-release публикует его раньше
             # build-джоб, и если упаковка упала (ripgrep 2026-10-21), тег есть,
             # артефактов нет. Такой релиз считаем недособранным — иначе сторож
