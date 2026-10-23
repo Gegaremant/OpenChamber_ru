@@ -82,6 +82,7 @@ jobs:
           TRANSLATE_MODEL: ${{ secrets.TRANSLATE_MODEL }}
           TRANSLATE_FALLBACK_MODEL: ${{ secrets.TRANSLATE_FALLBACK_MODEL }}
           TRANSLATE_RESERVE_MODEL: ${{ secrets.TRANSLATE_RESERVE_MODEL }}
+          TRANSLATE_POOL: ${{ secrets.TRANSLATE_POOL }}
         run: |
           set -euo pipefail
           VERSION="${{ needs.check-upstream.outputs.new_version }}"

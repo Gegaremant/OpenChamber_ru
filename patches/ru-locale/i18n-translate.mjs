@@ -77,6 +77,17 @@ const models = [process.env.TRANSLATE_MODEL || 'gpt-4o-mini'];
 if (process.env.TRANSLATE_FALLBACK_MODEL) models.push(process.env.TRANSLATE_FALLBACK_MODEL);
 if (process.env.TRANSLATE_RESERVE_MODEL) models.push(process.env.TRANSLATE_RESERVE_MODEL);
 
+// Пул моделей (как у OpenRouter): "model-a,model-b,..." — уходит в запрос
+// одним массивом `models`, и роутер агрегатора сам фолбэчит между ними,
+// если первая недоступна. Имеет приоритет над цепочкой TRANSLATE_MODEL.
+// Работает с любым OpenAI-совместимым провайдером, понимающим `models`
+// (OpenRouter, Requesty, LiteLLM-роутер и т.п.); при одиночном `models`
+// без такого поля оставить пустым — тогда работает старая цепочка.
+const pool = (process.env.TRANSLATE_POOL || '')
+  .split(/[,\s]+/)
+  .map((s) => s.trim())
+  .filter(Boolean);
+
 let headers = { 'Content-Type': 'application/json' };
 if (apiPass) headers.Authorization = 'Basic ' + Buffer.from(`${apiUser || ''}:${apiPass}`).toString('base64');
 else headers.Authorization = `Bearer ${apiKey}`;
@@ -111,7 +122,8 @@ async function translatePayload(payload) {
   for (let round = 1; round <= MAX_ROUNDS && uncovered().length > 0; round++) {
     const beforeRound = uncovered().length;
 
-    for (const model of models) {
+    const modelList = pool.length ? [pool.join(' + ')] : models;
+    for (const model of modelList) {
       const todo0 = uncovered();
       if (!todo0.length) break;
       let failed = null;
@@ -128,10 +140,13 @@ async function translatePayload(payload) {
 
         for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
           try {
+            const body = { temperature: 0.2, max_tokens: 16384, messages: [{ role: 'user', content: prompt }] };
+            if (pool.length) body.models = pool;
+            else body.model = model;
             const res = await fetch(`${base}/chat/completions`, {
               method: 'POST',
               headers,
-              body: JSON.stringify({ model, temperature: 0.2, max_tokens: 16384, messages: [{ role: 'user', content: prompt }] }),
+              body: JSON.stringify(body),
             });
             if (!res.ok) throw new Error(`HTTP ${res.status}: ${(await res.text()).slice(0, 200)}`);
             const data = await res.json();
