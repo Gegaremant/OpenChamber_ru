@@ -140,7 +140,7 @@ async function translatePayload(payload) {
 
         for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
           try {
-            const body = { temperature: 0.2, max_tokens: 16384, messages: [{ role: 'user', content: prompt }] };
+            const body = { temperature: 0.2, max_tokens: 8192, messages: [{ role: 'user', content: prompt }] };
             if (pool.length) body.models = pool;
             else body.model = model;
             const res = await fetch(`${base}/chat/completions`, {
@@ -199,6 +199,15 @@ async function translatePayload(payload) {
     if (uncovered().length === beforeRound) {
       console.warn(`::warning::Раунд ${round}: прогресса нет — прекращаю добор.`);
       break;
+    }
+
+    // Квотные шлюзы живут «окнами»: каналы распускают лимиты через минуты.
+    // Между раундами добора ждём 60/120с — этого хватает, чтобы поймать окно,
+    // но не разжирает CI-тайминги.
+    if (round < MAX_ROUNDS && uncovered().length > 0) {
+      const pause = round * 60 * 1000;
+      console.log(`  • ждём ${pause / 1000}с до раунда ${round + 1}: каналы шлюза могут опуститься — ${uncovered().length} ключей в доборе`);
+      await sleep(pause);
     }
   }
 
