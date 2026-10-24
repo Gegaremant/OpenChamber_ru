@@ -154,7 +154,13 @@ async function translatePayload(payload) {
               const wanted = ['server', 'cf-ray', 'cf-mitigated', 'x-powered-by', 'content-type', 'retry-after', 'x-ratelimit-remaining', 'proxy-status', 'via'];
               const marks = [];
               res.headers.forEach((v, k) => { if (wanted.includes(k.toLowerCase())) marks.push(`${k}=${v}`); });
-              throw new Error(`HTTP ${res.status}${marks.length ? ` [${marks.join(' ')}]` : ''}: ${(await res.text()).slice(0, 200)}`);
+              const raw = await res.text();
+              let extra = '';
+              try {
+                const j = JSON.parse(raw);
+                if (j.diagnostics) extra = ' diag=' + JSON.stringify(j.diagnostics).slice(0, 800);
+              } catch {}
+              throw new Error(`HTTP ${res.status}${marks.length ? ` [${marks.join(' ')}]` : ''}: ${raw.slice(0, 120)}${extra}`);
             }
             const data = await res.json();
             const content = data.choices?.[0]?.message?.content || '';
