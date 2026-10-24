@@ -167,8 +167,9 @@ async function translatePayload(payload) {
             const cause = e.cause && (e.cause.code || e.cause.message || JSON.stringify(e.cause).slice(0, 300));
             failed = e.message + (cause ? ` (${cause})` : '');
             if (attempt < MAX_ATTEMPTS) {
-              console.warn(`  • ${model}: порция ${nPortion}/${nPortions}, попытка ${attempt}: ${failed} — повтор через ${attempt * 3}с`);
-              await sleep(attempt * 3000);
+              // Паузы 5/20/60с: гейтвеи с квотами каналов («all targets skipped
+              // by pre-dispatch filters») распускаются через минуты, а не секунды.
+              await sleep([5, 20, 60][attempt - 1] * 1000);
             } else {
               softBreak = true;
               console.warn(`  • ${model}: порция ${nPortion}/${nPortions} не переведена после ${MAX_ATTEMPTS} попыток: ${failed}`);
