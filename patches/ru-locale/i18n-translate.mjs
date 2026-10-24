@@ -148,7 +148,14 @@ async function translatePayload(payload) {
               headers,
               body: JSON.stringify(body),
             });
-            if (!res.ok) throw new Error(`HTTP ${res.status}: ${(await res.text()).slice(0, 200)}`);
+            if (!res.ok) {
+              // Диагностика блокировок на пути (Cloudflare/WAF/прокси шлюза):
+              // пустые 503 без тела не объясняются сами, смотрим заголовки.
+              const wanted = ['server', 'cf-ray', 'cf-mitigated', 'x-powered-by', 'content-type', 'retry-after', 'x-ratelimit-remaining', 'proxy-status', 'via'];
+              const marks = [];
+              res.headers.forEach((v, k) => { if (wanted.includes(k.toLowerCase())) marks.push(`${k}=${v}`); });
+              throw new Error(`HTTP ${res.status}${marks.length ? ` [${marks.join(' ')}]` : ''}: ${(await res.text()).slice(0, 200)}`);
+            }
             const data = await res.json();
             const content = data.choices?.[0]?.message?.content || '';
             const parsed = JSON.parse(content.replace(/```json|```/g, '').trim());
