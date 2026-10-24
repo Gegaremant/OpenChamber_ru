@@ -160,7 +160,7 @@ async function translatePayload(payload) {
                 const j = JSON.parse(raw);
                 if (j.diagnostics) extra = ' diag=' + JSON.stringify(j.diagnostics).slice(0, 800);
               } catch {}
-              throw new Error(`HTTP ${res.status}${marks.length ? ` [${marks.join(' ')}]` : ''}: ${raw.slice(0, 120)}${extra}`);
+              throw new Error(`HTTP ${res.status}${marks.length ? ` [${marks.join(' ')}]` : ''}: ${raw.slice(0, 700)}${extra}`);
             }
             const data = await res.json();
             const content = data.choices?.[0]?.message?.content || '';
@@ -179,6 +179,12 @@ async function translatePayload(payload) {
           } catch (e) {
             const cause = e.cause && (e.cause.code || e.cause.message || JSON.stringify(e.cause).slice(0, 300));
             failed = e.message + (cause ? ` (${cause})` : '');
+            // 403 = шлюз в конфиг-отказе (комбо не входит в whitelist ключа) —
+            // порциями и ретраями это не лечится, роняем сразу с полным сообщением.
+            if (/^HTTP 403\b/.test(failed)) {
+              console.error(`::error::Шлюз отказал в доступе — ${failed}`);
+              throw new Error(failed);
+            }
             if (attempt < MAX_ATTEMPTS) {
               // Паузы 5/20/60с: гейтвеи с квотами каналов («all targets skipped
               // by pre-dispatch filters») распускаются через минуты, а не секунды.
