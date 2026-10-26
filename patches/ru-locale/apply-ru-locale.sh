@@ -56,6 +56,42 @@ cp "$SCRIPT_DIR/ru.settings.ts" packages/ui/src/lib/i18n/messages/ru.settings.ts
 # Хвост "};", а не "} as const;", тоже валиден: ru.ts типизирован явно
 # (Record<I18nKey, string>), as const ему не нужен.
 MSG_DIR="packages/ui/src/lib/i18n/messages"
+
+# Висячие импорты: апстрим удаляет/переименовывает модули (linear-integration
+# исчез в v2.5.1), а наши словари продолжают импортировать './linear-integration.i18n'
+# и спредить его ключи. Ключи при этом апстрим вливает в en.settings.ts, и
+# автопереводчик дописывает их литералами — спред больше не нужен, а импорт
+# роняет bun/tsc («Could not resolve»). Вырезаем импорт+спред только если
+# файла модуля нет в дереве: существующие модули продолжают работать как раньше.
+node - "$MSG_DIR" <<'NODEEOF'
+const fs = require('fs');
+const path = require('path');
+const dir = process.argv[2];
+for (const f of ['ru.ts', 'ru.settings.ts']) {
+  const p = path.join(dir, f);
+  if (!fs.existsSync(p)) continue;
+  let text = fs.readFileSync(p, 'utf8');
+  const importRe = /import \{ ([\w$]+) \} from '\.\/([\w.-]+\.i18n)';\n/g;
+  const drops = [];
+  let m;
+  while ((m = importRe.exec(text))) {
+    const [, name, mod] = m;
+    if (!fs.existsSync(path.join(dir, mod + '.ts'))) drops.push({ name, mod });
+  }
+  let changed = false;
+  for (const { name, mod } of drops) {
+    const before = text;
+    text = text.replace(new RegExp(`import \\{ ${name} \\} from '\\./${mod.replace(/[.]/g, '\\.')}';\\n`), '');
+    text = text.replace(new RegExp(`^\\s*\\.\\.\\.${name}(?:\\.\\w+)?,\\n`, 'gm'), '');
+    if (text !== before) {
+      changed = true;
+      console.log(`  ✂ ${f}: вырезан висячий импорт ${mod} (модуля нет в апстриме)`);
+    }
+  }
+  if (changed) fs.writeFileSync(p, text);
+}
+NODEEOF
+
 for f in "$MSG_DIR/ru.ts" "$MSG_DIR/ru.settings.ts"; do
   last="$(tail -n 1 "$f")"
   case "$last" in

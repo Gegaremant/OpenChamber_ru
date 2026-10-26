@@ -260,7 +260,67 @@ let wroteLinear = 0;
 
 for (const f of linearFiles) {
   const patchPath = path.join(patchesDir, f);
-  if (fs.existsSync(patchPath) && hasRuBlock(patchPath)) continue;
+
+  // Уже есть донор-патч с ru-блоком — дозаполняем НОВЫЕ ключи апстрима.
+  // Апстрим дописывает ключи в старые модули (source-board: 93 → 102 в
+  // v2.5.1), а strict-чекер на недостающие убивает сборку. Раньше такие
+  // модули просто пропускались (`continue`), и дыра жила до ручной правки.
+  if (fs.existsSync(patchPath) && hasRuBlock(patchPath)) {
+    const src = read(path.join(messagesDir, f));
+    const enMatch = src.match(/^[ \t]*en: \{([\s\S]*?)^[ \t]*\},\n/m);
+    if (!enMatch) continue;
+    const pairs = load('{\n' + enMatch[1] + '\n}');
+    const have = new Set(Object.keys(load(read(patchPath))));
+    const fresh = Object.keys(pairs).filter((k) => !have.has(k) && !IGNORED.has(k));
+    if (!fresh.length) continue;
+
+    console.log(`i18n-translate: добор в существующий донор ${f} — +${fresh.length} новых ключей, перевожу…`);
+    const sub = {};
+    for (const k of fresh) sub[k] = pairs[k];
+    const r = await translatePayload(sub);
+    if (r.failed.length) {
+      console.error(`::error::Не переведены ключи добора ${f}: ${r.failed.slice(0, 50).join(', ')}`);
+      process.exitCode = 1;
+      continue;
+    }
+
+    const plines = read(patchPath).split('\n');
+    // Вставлять только ВНУТРЬ ru-блока: старые доноры бывают трёхязычными
+    // (en/ru/tr, как linear-panel) — втыкание перед последней '},' файла
+    // уронило новые ключи в turkish-блок, и strict-чекер их не увидел.
+    const ruAt = plines.findIndex((l) => /^  ru: \{/.test(l));
+    if (ruAt < 0) {
+      console.warn(`::warning::${f}: не нашёл строку 'ru: {' в доноре — добор пропущен`);
+      continue;
+    }
+    let depth = 1; // открыли 'ru: {'
+    let closeAt = -1;
+    for (let i = ruAt + 1; i < plines.length; i++) {
+      depth += (plines[i].match(/\{/g) || []).length - (plines[i].match(/\}/g) || []).length;
+      if (depth === 0) { closeAt = i; break; }
+    }
+    if (closeAt < 0) {
+      console.warn(`::warning::${f}: не нашёл закрывающую ru-блока '},' — добор пропущен`);
+      continue;
+    }
+    const add = [];
+    for (const k of fresh) {
+      const v = r.json[k];
+      if (typeof v !== 'string' || !v.trim()) {
+        console.warn(`  ! нет перевода для ${k}`);
+        continue;
+      }
+      const clean = unquotedFix(v).trim().replace(/\\/g, '\\\\').replace(/\n/g, '\\\\n').replace(/\r/g, '\\\\r').replace(/\t/g, '\\\\t').replace(/'/g, "\\'");
+      add.push(`    '${k}': '${clean}',`);
+    }
+    if (add.length) {
+      plines.splice(closeAt, 0, ...add);
+      fs.writeFileSync(patchPath, plines.join('\n'));
+      wroteLinear++;
+      console.log(`  ✓ дозаполнен ${f} (+${add.length} ключей)`);
+    }
+    continue;
+  }
 
   const src = read(path.join(messagesDir, f));
   const exp = src.match(/export const (\w+) = \{/);

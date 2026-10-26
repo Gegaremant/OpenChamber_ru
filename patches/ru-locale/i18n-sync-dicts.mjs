@@ -82,14 +82,23 @@ function sync(target, source, label) {
 
   // Импорты: type-импорты оставляем как есть — от `import type { I18nKey }`
   // зависит типизация `Record<I18nKey, string>`, и его терять нельзя.
+  // Якоря «хотя бы один import» может не быть: apply-ru-locale вырезает
+  // висячие импорты модулей, которых апстрим удалил (linear-integration
+  // исчез в v2.5.1), и если это был единственный — вставляем блок перед
+  // первым `export`, а не падаем.
   const typeImports = out.match(/^import type .*$/gm) || [];
-  const first = out.search(/^import /m);
-  if (first < 0) {
-    console.error(`в ${target} нет строк import`);
-    process.exit(1);
+  const newBlock = [...typeImports, ...imports].join('\n') + '\n';
+  const importRun = out.match(/^(?:import [^\n]*\n)+/m);
+  if (importRun) {
+    out = out.slice(0, importRun.index) + newBlock + out.slice(importRun.index + importRun[0].length);
+  } else {
+    const ex = out.search(/^export /m);
+    if (ex < 0) {
+      console.error(`в ${target} нет ни import, ни export — не знаю, куда вставлять импорты`);
+      process.exit(1);
+    }
+    out = out.slice(0, ex) + newBlock + out.slice(ex);
   }
-  const last = out.search(/^(?!import )/m, first) - 1;
-  out = out.slice(0, first) + [...typeImports, ...imports].join('\n') + out.slice(last + 1);
 
   // Спреды: подряд идущий блок `  ...X,` меняем на сгенерированный, отступ
   // берём из первой найденной строки (в ru.settings.ts он шире, чем в ru.ts).
