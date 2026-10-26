@@ -156,11 +156,23 @@ async function translatePayload(payload) {
               res.headers.forEach((v, k) => { if (wanted.includes(k.toLowerCase())) marks.push(`${k}=${v}`); });
               const raw = await res.text();
               let extra = '';
-              try {
-                const j = JSON.parse(raw);
-                if (j.diagnostics) extra = ' diag=' + JSON.stringify(j.diagnostics).slice(0, 800);
-              } catch {}
-              throw new Error(`HTTP ${res.status}${marks.length ? ` [${marks.join(' ')}]` : ''}: ${raw.slice(0, 700)}${extra}`);
+              let parsedErr = {};
+              try { parsedErr = JSON.parse(raw).error; extra = JSON.stringify(parsedErr).slice(0, 640); } catch { extra = raw.slice(0, 300); }
+              // 403 — конфиг: ключ не допущен к запрошенной модели/комбо.
+              // Спрашиваем у шлюза список моделей, разрешённых этому ключу,
+              // и показываем в логе — имя берём из первоисточника, не гадаем.
+              if (res.status === 403) {
+                try {
+                  const ml = await fetch(`${base}/models`, { headers });
+                  const mj = await ml.json();
+                  const ids = Array.isArray(mj.data) ? mj.data.map((m) => m.id).filter(Boolean) : [];
+                  if (ids.length) console.log(`::notice::Модели, разрешённые ЭТОМУ ключу (${ids.length}): ${ids.join(', ')}`);
+                  else console.warn(`::warning::/models пуст для этого ключа (HTTP ${ml.status}): ${JSON.stringify(mj).slice(0, 200)}`);
+                } catch (me) {
+                  console.warn(`::warning::/models не читается: ${me.message}`);
+                }
+              }
+              throw new Error(`HTTP ${res.status}${marks.length ? ` [${marks.join(' ')}]` : ''}: ${extra}`);
             }
             const data = await res.json();
             const content = data.choices?.[0]?.message?.content || '';
