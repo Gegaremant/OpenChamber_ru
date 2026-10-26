@@ -272,6 +272,11 @@ export const linearIssuePickerI18n = {
     'session.newWorktree.actions.startFromLinearIssue': 'Начать с задачи Linear',
     'session.newWorktree.fromLinearIssue': 'Из {identifier}: {title}',
     'session.newWorktree.error.sendLinearContextFailed': 'Не удалось отправить контекст Linear.',
+    'chat.chatInput.actions.linkTrackerItem': 'Связать задачу {provider}',
+    'chat.chatInput.linked.trackerItem.openInBrowserAria': 'Открыть задачу в {provider}',
+    'chat.chatInput.linked.trackerItem.removeAria': 'Удалить связанную задачу {provider}',
+    'chat.workStatus.linkedIssues.openTrackerItem': 'Открыть {identifier} в {provider}',
+    'session.newWorktree.actions.startFromTrackerItem': 'Задача {provider}',
   },
   uk: {
     'chat.chatInput.actions.linkLinearIssue': 'Прив’язати Linear issue',

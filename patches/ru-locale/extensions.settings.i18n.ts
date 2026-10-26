@@ -140,5 +140,8 @@ export const extensionsSettingsI18n = {
     'settings.extensions.detail.field.source': 'Источник',
     'settings.extensions.detail.field.version': 'Версия',
     'settings.extensions.detail.field.location': 'Расположение',
+    'settings.extensions.capability.service.providesSourceControl': 'Выступает в роли Git-хоста "{label}": OpenChamber отправляет ему названия репозиториев, ветки и текст создаваемых вами задач и пулл-реквестов, а также просит его создавать их, комментировать и объединять за вас. Ваши токены остаются в OpenChamber и отправляются только на те хосты, в которые вы вошли.',
+    'settings.extensions.browse.label': 'Просмотр расширений',
+    'settings.extensions.browse.hint': 'Список сообщества на openchamber.dev',
   },
 } as const;

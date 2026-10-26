@@ -467,6 +467,10 @@ export const linearPanelI18n = {
     'contextPanel.linear.toast.workspaceSwitched': 'Рабочая область Linear переключена',
     'contextPanel.linear.toast.workspaceSwitchFailed': 'Не удалось переключить рабочую область Linear.',
     'contextPanel.linear.error.noCompletedState': 'У этой команды нет статуса «Завершено»',
+    'tracker.priority.urgent': 'Срочный',
+    'tracker.priority.high': 'Высокий',
+    'tracker.priority.medium': 'Средний',
+    'tracker.priority.low': 'Низкий',
   },
   uk: {
     'contextPanel.mode.linear': 'Linear',
