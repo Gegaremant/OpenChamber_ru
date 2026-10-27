@@ -1,8 +1,36 @@
-/**
- * worktree-archive — merged into each locale's main dictionary.
- */
-export const WorktreeArchiveI18n = {
+/** Русский блок для worktree-archive.i18n.ts — вставляется в свежий файл апстрима. */
+export const worktreeArchiveI18n = {
   ru: {
-
+    'sessions.sidebar.work.menu.archive': 'Перевод(мок:mock/a:free): "Archive worktree"',
+    'sessions.sidebar.work.archive.done': 'Перевод(мок:mock/a:free): "Worktree archived"',
+    'sessions.sidebar.work.archive.kept': 'Перевод(мок:mock/a:free): "Worktree not archived"',
+    'sessions.sidebar.work.archive.keptRunning': 'Перевод(мок:mock/a:free): "A session there is still running."',
+    'sessions.sidebar.work.archive.keptUnknown': 'Перевод(мок:mock/a:free): "Couldn\'t check whether a session there is still running."',
+    'sessions.sidebar.work.archive.failed': 'Перевод(мок:mock/a:free): "Couldn\'t archive the worktree"',
+    'sessions.archive.worktree.restore': 'Перевод(мок:mock/a:free): "Restore"',
+    'sessions.archive.worktree.restoreAria': 'Перевод(мок:mock/a:free): "Restore the worktree {label}"',
+    'sessions.archive.worktree.restored': 'Перевод(мок:mock/a:free): "Worktree restored"',
+    'sessions.archive.worktree.restoredWithConflicts': 'Перевод(мок:mock/a:free): "Worktree restored with conflicts"',
+    'sessions.archive.worktree.restoredWithConflictsDescription': 'Перевод(мок:mock/a:free): "Its changes clash with newer commits on the branch. Git shows the conflicts in the worktree."',
+    'sessions.archive.worktree.sessionsNotRestored': 'Перевод(мок:mock/a:free): "Some sessions weren\'t restored"',
+    'sessions.archive.worktree.sessionsNotRestoredDescription': 'Перевод(мок:mock/a:free): "Restore them from the Archive page."',
+    'sessions.archive.worktree.restoreFailed': 'Перевод(мок:mock/a:free): "Couldn\'t restore the worktree"',
+    'sessions.archive.worktree.restoredWithSession': 'Перевод(мок:mock/a:free): "Its changes and other sessions are back too."',
+    'sessions.archive.worktree.deleteTitle': 'Перевод(мок:mock/a:free): "Delete {label} for good?"',
+    'sessions.archive.worktree.deleteMessage': 'Перевод(мок:mock/a:free): "Its sessions, the changes kept with it and its local branch are deleted. This can\'t be undone."',
+    'sessions.archive.worktree.deleteAction': 'Перевод(мок:mock/a:free): "Delete"',
+    'sessions.archive.worktree.deleted': 'Перевод(мок:mock/a:free): "Archived worktree deleted"',
+    'sessions.archive.worktree.deleteFailed': 'Перевод(мок:mock/a:free): "Couldn\'t delete the archived worktree"',
+    'sessions.archive.worktree.deleteAria': 'Перевод(мок:mock/a:free): "Delete the archived worktree {label}"',
+    'sessions.archive.worktree.deleteTooltip': 'Перевод(мок:mock/a:free): "Delete for good"',
+    'sessions.archivePage.all': 'Перевод(мок:mock/a:free): "All"',
+    'sessions.archivePage.other': 'Перевод(мок:mock/a:free): "Other"',
+    'settings.openchamber.worktrees.archived.title': 'Перевод(мок:mock/a:free): "Archived worktrees"',
+    'sessions.mergedCleanup.toast.archivedTitle': 'Перевод(мок:mock/a:free): "Worktree archived: PR #{number} merged"',
+    'sessions.mergedCleanup.toast.mr.archivedTitle': 'Перевод(мок:mock/a:free): "Worktree archived: MR !{number} merged"',
+    'settings.openchamber.finishedWorktrees.title': 'Перевод(мок:mock/a:free): "Finished worktrees"',
+    'settings.openchamber.finishedWorktrees.info': 'Перевод(мок:mock/a:free): "Archiving removes the worktree folder; its branch, changes and sessions wait in Archive, ready to restore. Nothing is archived while an agent is working there."',
+    'settings.openchamber.finishedWorktrees.field.archiveOnDone': 'Перевод(мок:mock/a:free): "Archive a worktree when you mark it done"',
+    'settings.openchamber.mergedWorktreeCleanup.field.enable': 'Перевод(мок:mock/a:free): "Archive a worktree after its PR is merged"',
   },
 };

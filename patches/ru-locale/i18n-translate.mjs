@@ -28,11 +28,11 @@ if (!messagesDir || !patchesDir) {
 }
 
 const read = (p) => fs.readFileSync(p, 'utf8');
-const keyRe = /^[\t ]*'([\w.]+)'\s*:\s*(.*),\s*$/gm;
+const keyRe = /^[\t ]*(['"])([\w.]+)\1\s*:\s*(.*),\s*$/gm;
 
 function load(text) {
   const out = {};
-  for (const m of text.matchAll(keyRe)) out[m[1]] = m[2].trim();
+  for (const m of text.matchAll(keyRe)) out[m[2]] = m[3].trim();
   return out;
 }
 

@@ -1,8 +1,22 @@
-/**
- * sidebar-work — merged into each locale's main dictionary.
- */
-export const SidebarWorkI18n = {
+/** Русский блок для sidebar-work.i18n.ts — вставляется в свежий файл апстрима. */
+export const sidebarWorkI18n = {
   ru: {
-
+    'sessions.sidebar.header.displayMode.keepWorkInPlace': 'Перевод(мок:mock/a:free): "Also show in work under projects"',
+    'sessions.sidebar.work.rename.failed': 'Перевод(мок:mock/a:free): "Couldn\'t rename the task"',
+    'sessions.sidebar.work.rename.placeholder': 'Перевод(мок:mock/a:free): "Task name"',
+    'sessions.sidebar.work.rename.aria': 'Перевод(мок:mock/a:free): "Rename the task"',
+    'sessions.sidebar.work.done.failed': 'Перевод(мок:mock/a:free): "Couldn\'t mark the task done"',
+    'sessions.sidebar.work.track.failed': 'Перевод(мок:mock/a:free): "Couldn\'t put the task in work"',
+    'sessions.sidebar.work.openAria': 'Перевод(мок:mock/a:free): "Open {label}"',
+    'sessions.sidebar.work.worktreeMark': 'Перевод(мок:mock/a:free): "Worktree"',
+    'sessions.sidebar.work.menu.label': 'Перевод(мок:mock/a:free): "Task menu for {label}"',
+    'sessions.sidebar.work.menu.rename': 'Перевод(мок:mock/a:free): "Rename task"',
+    'sessions.sidebar.draft.attachmentsSingle': 'Перевод(мок:mock/a:free): "Draft with {count} attachment"',
+    'sessions.sidebar.draft.attachmentsPlural': 'Перевод(мок:mock/a:free): "Draft with {count} attachments"',
+    'sessions.sidebar.draft.attachmentsMissing': 'Перевод(мок:mock/a:free): "Some of the draft\'s attachments couldn\'t be read"',
+    'sessions.sidebar.draft.discard': 'Перевод(мок:mock/a:free): "Discard draft"',
+    'sessions.sidebar.draft.discardFailed': 'Перевод(мок:mock/a:free): "Couldn\'t discard the draft"',
+    'sessions.sidebar.draft.openAria': 'Перевод(мок:mock/a:free): "Open draft: {label}"',
+    'sessions.sidebar.draft.tooLarge': 'Перевод(мок:mock/a:free): "This draft\'s attachments are too large to keep for your other devices. It stays here until you send it."',
   },
 };
