@@ -134,5 +134,6 @@ export const routingI18n = {
     'settings.classification.test.notFound': 'По этому адресу никто не отвечает (HTTP 404). Проверьте URL и модель.',
     'settings.classification.test.http': '{provider} ответил с кодом HTTP {status}.',
     'settings.classification.test.failed': 'Проверка не смогла выполниться: {error}',
+    'settings.classification.source.zenPromo.unavailable': 'Временно недоступно. А пока добавьте API-ключ OpenCode Zen.',
   },
 } as const;

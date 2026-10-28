@@ -1,0 +1,27 @@
+/** Русский блок для snippets.i18n.ts — вставляется в свежий файл апстрима. */
+export const snippetsI18n = {
+  ru: {
+    'snippets.field.name': 'Имя',
+    'snippets.field.scopeAria': 'Область действия сниппета',
+    'snippets.name.taken': '#{name} уже используется другим сниппетом',
+    'snippets.name.invalid': 'Имя должно начинаться с буквы или цифры и содержать только буквы, цифры, дефисы и подчеркивания',
+    'snippets.toast.saved': '#{name} сохранен',
+    'snippets.quickCreate.action': 'Сохранить как сниппет',
+    'snippets.quickCreate.titleNew': 'Новый сниппет',
+    'snippets.quickCreate.description': 'Введите #{name} в промпте, чтобы вставить этот текст.',
+    'snippets.quickCreate.save': 'Сохранить',
+    'settings.snippets.page.field.aliasPlaceholder': 'Добавить псевдоним',
+    'settings.snippets.page.field.aliasRemove': 'Удалить псевдоним {alias}',
+    'settings.snippets.page.contentHint': 'Введите #name в промпте, чтобы вставить этот текст. Блоки <prepend> и <append> добавляются до и после всего промпта, а #name внутри также раскрывается. В предпросмотре отображается результат.',
+    'settings.snippets.page.content.edit': 'Редактировать',
+    'settings.snippets.page.content.preview': 'Предпросмотр',
+    'settings.snippets.page.content.modeAria': 'Просмотр содержимого',
+    'settings.snippets.page.preview.empty': 'Этот сниппет не добавляет текст.',
+    'settings.snippets.page.preview.failed': 'Не удалось создать предпросмотр.',
+    'settings.snippets.sidebar.dialog.discardTitle': 'Отменить несохраненные изменения?',
+    'settings.snippets.sidebar.dialog.discardDescription': 'Ваши изменения в #{name} не сохранены.',
+    'settings.snippets.sidebar.dialog.discard': 'Отменить',
+    'chat.snippetAutocomplete.action.create': 'Создать #{name}',
+    'chat.snippetAutocomplete.action.saveDraft': 'Сохранить черновик как #{name}',
+  },
+};

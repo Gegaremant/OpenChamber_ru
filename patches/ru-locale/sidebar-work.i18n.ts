@@ -18,5 +18,12 @@ export const sidebarWorkI18n = {
     'sessions.sidebar.draft.discardFailed': 'Перевод(мок:mock/a:free): "Couldn\'t discard the draft"',
     'sessions.sidebar.draft.openAria': 'Перевод(мок:mock/a:free): "Open draft: {label}"',
     'sessions.sidebar.draft.tooLarge': 'Перевод(мок:mock/a:free): "This draft\'s attachments are too large to keep for your other devices. It stays here until you send it."',
+    'sessions.sidebar.work.menu.pin': '"Закрепить задачу"',
+    'sessions.sidebar.work.menu.unpin': '"Открепить задачу"',
+    'sessions.sidebar.work.pin.failed': '"Не удалось закрепить задачу"',
+    'sessions.sidebar.work.unpin.failed': '"Не удалось открепить задачу"',
+    'chat.draftTarget.drafts.heading': '"Черновики"',
+    'chat.draftTarget.drafts.triggerSingle': '"{count} черновик"',
+    'chat.draftTarget.drafts.triggerPlural': '"{count} черновиков"',
   },
 };
