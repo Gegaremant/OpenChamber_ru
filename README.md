@@ -6,25 +6,26 @@
 
 ## Скачать
 
-**Актуальная версия: v2.5.2**
+**Актуальная версия: v2.5.3**
 
 | Платформа | Прямая ссылка |
 |-----------|---------------|
-| **Linux x86-64** | [OpenChamber_ru-2.5.2-linux-x86_64.AppImage](https://github.com/Gegaremant/OpenChamber_ru/releases/download/v2.5.2/OpenChamber_ru-2.5.2-linux-x86_64.AppImage) |
-| **Windows x64** | [OpenChamber_ru-2.5.2-win-x64.exe](https://github.com/Gegaremant/OpenChamber_ru/releases/download/v2.5.2/OpenChamber_ru-2.5.2-win-x64.exe) |
-| **macOS x64** | [OpenChamber_ru-2.5.2-mac-x64.dmg](https://github.com/Gegaremant/OpenChamber_ru/releases/download/v2.5.2/OpenChamber_ru-2.5.2-mac-x64.dmg) · [OpenChamber_ru-2.5.2-mac-x64.zip](https://github.com/Gegaremant/OpenChamber_ru/releases/download/v2.5.2/OpenChamber_ru-2.5.2-mac-x64.zip) |
-| **Android** | [OpenChamber_ru-2.5.2-android.apk](https://github.com/Gegaremant/OpenChamber_ru/releases/download/v2.5.2/OpenChamber_ru-2.5.2-android.apk) |
-| **Linux (установщик)** | [install-linux.sh](https://github.com/Gegaremant/OpenChamber_ru/releases/download/v2.5.2/install-linux.sh) |
+| **Linux x86-64** | [OpenChamber_ru-2.5.3-linux-x86_64.AppImage](https://github.com/Gegaremant/OpenChamber_ru/releases/download/v2.5.3/OpenChamber_ru-2.5.3-linux-x86_64.AppImage) |
+| **Windows x64** | [OpenChamber_ru-2.5.3-win-x64.exe](https://github.com/Gegaremant/OpenChamber_ru/releases/download/v2.5.3/OpenChamber_ru-2.5.3-win-x64.exe) |
+| **macOS x64** | [OpenChamber_ru-2.5.3-mac-x64.dmg](https://github.com/Gegaremant/OpenChamber_ru/releases/download/v2.5.3/OpenChamber_ru-2.5.3-mac-x64.dmg) · [OpenChamber_ru-2.5.3-mac-x64.zip](https://github.com/Gegaremant/OpenChamber_ru/releases/download/v2.5.3/OpenChamber_ru-2.5.3-mac-x64.zip) |
+| **Android** | [OpenChamber_ru-2.5.3-android.apk](https://github.com/Gegaremant/OpenChamber_ru/releases/download/v2.5.3/OpenChamber_ru-2.5.3-android.apk) |
+| **Linux (установщик)** | [install-linux.sh](https://github.com/Gegaremant/OpenChamber_ru/releases/download/v2.5.3/install-linux.sh) |
 
 Установка на Linux: [быстрый старт](#linux-debian--ubuntu) ниже. Все артефакты именуются единообразно с префиксом `OpenChamber_ru-`.
 
 ### Все выпущенные версии (кликабельно)
 
 <details>
-<summary>Показать таблицу релизов v1.22.1 – v2.5.2</summary>
+<summary>Показать таблицу релизов v1.22.1 – v2.5.3</summary>
 
 | Версия | Linux | Windows | macOS | Android |
 |--------|-------|---------|-------|---------|
+| v2.5.3 | [AppImage](https://github.com/Gegaremant/OpenChamber_ru/releases/download/v2.5.3/OpenChamber_ru-2.5.3-linux-x86_64.AppImage) | [EXE](https://github.com/Gegaremant/OpenChamber_ru/releases/download/v2.5.3/OpenChamber_ru-2.5.3-win-x64.exe) | [DMG](https://github.com/Gegaremant/OpenChamber_ru/releases/download/v2.5.3/OpenChamber_ru-2.5.3-mac-x64.dmg) · [ZIP](https://github.com/Gegaremant/OpenChamber_ru/releases/download/v2.5.3/OpenChamber_ru-2.5.3-mac-x64.zip) | [APK](https://github.com/Gegaremant/OpenChamber_ru/releases/download/v2.5.3/OpenChamber_ru-2.5.3-android.apk) |
 | v2.5.2 | [AppImage](https://github.com/Gegaremant/OpenChamber_ru/releases/download/v2.5.2/OpenChamber_ru-2.5.2-linux-x86_64.AppImage) | [EXE](https://github.com/Gegaremant/OpenChamber_ru/releases/download/v2.5.2/OpenChamber_ru-2.5.2-win-x64.exe) | [DMG](https://github.com/Gegaremant/OpenChamber_ru/releases/download/v2.5.2/OpenChamber_ru-2.5.2-mac-x64.dmg) · [ZIP](https://github.com/Gegaremant/OpenChamber_ru/releases/download/v2.5.2/OpenChamber_ru-2.5.2-mac-x64.zip) | [APK](https://github.com/Gegaremant/OpenChamber_ru/releases/download/v2.5.2/OpenChamber_ru-2.5.2-android.apk) |
 | v2.5.1 | [AppImage](https://github.com/Gegaremant/OpenChamber_ru/releases/download/v2.5.1/OpenChamber_ru-2.5.1-linux-x86_64.AppImage) | [EXE](https://github.com/Gegaremant/OpenChamber_ru/releases/download/v2.5.1/OpenChamber_ru-2.5.1-win-x64.exe) | [DMG](https://github.com/Gegaremant/OpenChamber_ru/releases/download/v2.5.1/OpenChamber_ru-2.5.1-mac-x64.dmg) · [ZIP](https://github.com/Gegaremant/OpenChamber_ru/releases/download/v2.5.1/OpenChamber_ru-2.5.1-mac-x64.zip) | [APK](https://github.com/Gegaremant/OpenChamber_ru/releases/download/v2.5.1/OpenChamber_ru-2.5.1-android.apk) |
 | v2.5.0 | [AppImage](https://github.com/Gegaremant/OpenChamber_ru/releases/download/v2.5.0/OpenChamber_ru-2.5.0-linux-x86_64.AppImage) | [EXE](https://github.com/Gegaremant/OpenChamber_ru/releases/download/v2.5.0/OpenChamber_ru-2.5.0-win-x64.exe) | [DMG](https://github.com/Gegaremant/OpenChamber_ru/releases/download/v2.5.0/OpenChamber_ru-2.5.0-mac-x64.dmg) · [ZIP](https://github.com/Gegaremant/OpenChamber_ru/releases/download/v2.5.0/OpenChamber_ru-2.5.0-mac-x64.zip) | [APK](https://github.com/Gegaremant/OpenChamber_ru/releases/download/v2.5.0/OpenChamber_ru-2.5.0-android.apk) |
