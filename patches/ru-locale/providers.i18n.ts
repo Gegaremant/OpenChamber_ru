@@ -78,5 +78,7 @@ export const providersI18n = {
     'settings.providers.methods.status.inUse': 'Используется',
     'settings.providers.methods.status.notInUse': 'Не используется',
     'settings.providers.methods.status.notConnected': 'Не подключено',
+    'settings.providers.card.status.noModels': 'No models',
+    'settings.providers.page.models.none': 'OpenCode lists no models for this provider.',
   },
 } as const;

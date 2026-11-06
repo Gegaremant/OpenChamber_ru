@@ -164,5 +164,8 @@ export const referencePickerI18n = {
     'references.picker.tracker.childrenDone': 'Подзадачи выполнены: {done} из {total}',
     'references.picker.tracker.childrenMany': 'Подзадачи: более {count}',
     'references.picker.preview.sends.tracker': 'Агент получает описание и комментарии.',
+    'references.link.copy': 'Copy link',
+    'references.link.copied': 'Link copied',
+    'references.link.copyFailed': 'Could not copy the link',
   },
 };

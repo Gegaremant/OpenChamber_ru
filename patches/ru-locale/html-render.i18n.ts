@@ -15,5 +15,7 @@ export const htmlRenderI18n = {
     'chat.htmlRender.answeredInChat': 'Ответ получен в чате',
     'chat.htmlRender.unanswered': 'Без ответа',
     'chat.htmlRender.answerFailed': 'Не удалось отправить ответ',
+    'chat.htmlRender.chatSentEarlier': 'You wrote in the chat before this page',
+    'chat.htmlRender.notDrawn': 'Sent back to the agent to fix',
   },
 };

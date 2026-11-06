@@ -12,5 +12,6 @@ export const mcpGridI18n = {
     'settings.mcp.grid.scope.project': 'Проект',
     'settings.mcp.page.back': 'Все серверы',
     'settings.mcp.grid.status.blockedByPolicy': 'Заблокировано политикой',
+    'settings.mcp.grid.runtimeProvided': 'Provided by OpenCode',
   },
 } as const;

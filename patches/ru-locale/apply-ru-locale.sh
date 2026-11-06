@@ -341,7 +341,7 @@ RECORDS_SCRIPT="$SCRIPT_DIR/patch-locale-records.mjs"
 if [ -f "$RECORDS_SCRIPT" ]; then
   echo ""
   echo "[6в] Заполняем Record<Locale,...> ключом ru..."
-  if ! node "$RECORDS_SCRIPT" "$BUILD_DIR"; then
+  if ! node "$RECORDS_SCRIPT" "$(pwd)"; then
     echo "  ✗ patch-locale-records.mjs завершился с ошибкой"
     VERIFY_FAILED=1
   fi

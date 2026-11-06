@@ -76,5 +76,6 @@ export const workflowsI18n = {
     'workflows.panel.saved.failed': 'Could not start the workflow',
     'sessions.sidebar.session.status.workflowRunning': 'Workflow running',
     'chat.workStatus.workflow.openRun': 'Open {name} in the Workflows panel',
+    'chat.workflow.turnedOff': 'Workflows are turned off. Turn on the workflow tool in Settings → General → OpenChamber Tools.',
   },
 };
