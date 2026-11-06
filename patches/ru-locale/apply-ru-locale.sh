@@ -314,6 +314,20 @@ done < <(find "$MSGS_DIR" -maxdepth 1 -type f -name '*.ts' \
             ! -name '*.settings.ts' ! -name '*.i18n.ts' -print0 | sort)
 
 # ============================================================
+# 6б. ExtensionsPage.tsx — добавляем ru в WEBSITE_LOCALE_PATHS
+# ============================================================
+# Апстрим v2.5.2 ввёл словарь, типизированный как Record<Locale, ...>.
+# Как только Locale получает 'ru', отсутствие ключа здесь — ошибка tsc
+# (TS2741 + TS7053). Тот же класс, что с типом Locale: перечисление
+# языков в апстриме разъезжается по разным файлам.
+EXT_PAGE="packages/ui/src/components/sections/extensions/ExtensionsPage.tsx"
+if [ -f "$EXT_PAGE" ]; then
+  if grep -q "WEBSITE_LOCALE_PATHS" "$EXT_PAGE"; then
+    perl -0pi -e "s/(nl: 'nl',)(?!\s*\n?\s*ru:)/\$1 ru: 'ru',/" "$EXT_PAGE"
+  fi
+fi
+
+# ============================================================
 # 7. walkthrough/languages.js — добавляем ru: 'Russian'
 # ============================================================
 echo ""
@@ -541,6 +555,9 @@ verify "словарь ru.ts на месте" \
     "packages/ui/src/lib/i18n/messages/ru.ts" "dict"
 verify "словарь ru.settings.ts на месте" \
     "packages/ui/src/lib/i18n/messages/ru.settings.ts" "dict"
+verify "ExtensionsPage знает про ru" \
+    "packages/ui/src/components/sections/extensions/ExtensionsPage.tsx" \
+    "ru: 'ru',"
 
 # LOCALES: 'ru' должен быть не просто в типе, но и в самом массиве,
 # иначе русский не появится в списке выбора языка.
