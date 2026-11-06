@@ -320,11 +320,33 @@ done < <(find "$MSGS_DIR" -maxdepth 1 -type f -name '*.ts' \
 # Как только Locale получает 'ru', отсутствие ключа здесь — ошибка tsc
 # (TS2741 + TS7053). Тот же класс, что с типом Locale: перечисление
 # языков в апстриме разъезжается по разным файлам.
+# Значение — null, а не 'ru': русской страницы на сайте апстрима нет,
+# и ссылка https://openchamber.dev/ru/extensions/ вела бы в 404. null
+# означает «показывать английскую страницу».
 EXT_PAGE="packages/ui/src/components/sections/extensions/ExtensionsPage.tsx"
 if [ -f "$EXT_PAGE" ]; then
   if grep -q "WEBSITE_LOCALE_PATHS" "$EXT_PAGE"; then
-    perl -0pi -e "s/(nl: 'nl',)(?!\s*\n?\s*ru:)/\$1 ru: 'ru',/" "$EXT_PAGE"
+    perl -0pi -e "s/(nl: 'nl',)(?!\s*\n?\s*ru:)/\$1 ru: null,/" "$EXT_PAGE"
   fi
+fi
+
+# ============================================================
+# 6в. Все объекты Record<Locale,...> / Record<Exclude<Locale,...>>
+# ============================================================
+# При добавлении 'ru' в Locale каждый такой объект обязан получить ключ ru,
+# иначе tsc падает на TS2741/TS2739. Апстрим заводит новые объекты в каждом
+# релизе (v2.6.1: LOCALE_LABEL_KEYS, lines.test.ts, easterEggCopy.ts),
+# поэтому не перечисляем файлы руками, а обходим дерево сканером.
+RECORDS_SCRIPT="$SCRIPT_DIR/patch-locale-records.mjs"
+if [ -f "$RECORDS_SCRIPT" ]; then
+  echo ""
+  echo "[6в] Заполняем Record<Locale,...> ключом ru..."
+  if ! node "$RECORDS_SCRIPT" "$BUILD_DIR"; then
+    echo "  ✗ patch-locale-records.mjs завершился с ошибкой"
+    VERIFY_FAILED=1
+  fi
+else
+  echo "  ⚠ patch-locale-records.mjs не найден — пропуск"
 fi
 
 # ============================================================
@@ -557,7 +579,18 @@ verify "словарь ru.settings.ts на месте" \
     "packages/ui/src/lib/i18n/messages/ru.settings.ts" "dict"
 verify "ExtensionsPage знает про ru" \
     "packages/ui/src/components/sections/extensions/ExtensionsPage.tsx" \
-    "ru: 'ru',"
+    "ru: (null|'ru'),"
+
+# Record<Locale,...> в тестах пасхалок появился в v2.6.1. На более старых
+# тегах файлов нет — проверяем только существующие.
+if [ -f "packages/ui/src/lib/easter-eggs/lines.test.ts" ]; then
+  verify "lines.test.ts знает про ru" \
+      "packages/ui/src/lib/easter-eggs/lines.test.ts" "^  ru: "
+fi
+if [ -f "packages/ui/src/lib/easter-eggs/easterEggCopy.ts" ]; then
+  verify "easterEggCopy.ts грузит ru" \
+      "packages/ui/src/lib/easter-eggs/easterEggCopy.ts" "^  ru: "
+fi
 
 # LOCALES: 'ru' должен быть не просто в типе, но и в самом массиве,
 # иначе русский не появится в списке выбора языка.

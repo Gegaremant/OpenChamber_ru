@@ -22,8 +22,11 @@ permissions:
   contents: write
 
 env:
-  BUN_VERSION: '1.3.14'
+  # Апстрим v2.6.1 объявляет packageManager bun@1.4.4 и TypeScript 7.
+  BUN_VERSION: '1.4.4'
   NODE_VERSION: '22'
+  # Секреты остаются на уровне шагов: на уровне workflow контекст secrets
+  # GitHub Actions не раскрывает.
   ORIGINAL_REPO: 'https://github.com/openchamber/openchamber.git'
   NODE_OPTIONS: '--max-old-space-size=4096'
 
@@ -70,8 +73,40 @@ jobs:
     needs: check-upstream
     if: needs.check-upstream.outputs.should_build == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Download upstream source
+        run: |
+          set -euo pipefail
+          VERSION="${{ needs.check-upstream.outputs.new_version }}"
+          # codeload отдаёт tarball без git-протокола: git clone периодически
+          # падает на GnuTLS, а tag tarball качается обычным HTTPS.
+          rm -rf upstream-src && mkdir -p upstream-src
+          if curl -fsSL --retry 3 --retry-delay 5 \
+               "https://codeload.github.com/openchamber/openchamber/tar.gz/refs/tags/v${VERSION}" \
+               -o /tmp/upstream.tar.gz \
+             && tar -xzf /tmp/upstream.tar.gz -C upstream-src --strip-components=1; then
+            echo "upstream v$VERSION получен через codeload"
+          else
+            echo "::warning::codeload не сработал — пробуем git clone"
+            rm -rf upstream-src
+            git clone --depth 1 --branch "v$VERSION" ${{ env.ORIGINAL_REPO }} upstream-src \
+              || { echo "::error::Тег v$VERSION не найден в upstream"; exit 1; }
+          fi
 
       - name: Auto-translate new keys
         env:
@@ -84,10 +119,48 @@ jobs:
           TRANSLATE_RESERVE_MODEL: ${{ secrets.TRANSLATE_RESERVE_MODEL }}
           TRANSLATE_POOL: ${{ secrets.TRANSLATE_POOL }}
         run: |
-          set -euo pipefail
-          VERSION="${{ needs.check-upstream.outputs.new_version }}"
-          git clone --depth 1 --branch "v$VERSION" ${{ env.ORIGINAL_REPO }} upstream-src || { echo "::error::Тег v$VERSION не найден в upstream"; exit 1; }
-          node patches/ru-locale/i18n-translate.mjs upstream-src/packages/ui/src/lib/i18n/messages patches/ru-locale
+          set -o pipefail
+          # Переводчик не валит пайплайн: непереведённое уходит в pending.json
+          # английскими заглушками и доберётся следующим прогоном. Если же он
+          # упадёт сам (апстрим сменил формат), ci-autofix починит скрипт.
+          node patches/ru-locale/ci-autofix.mjs \
+            --command 'node patches/ru-locale/i18n-translate.mjs upstream-src/packages/ui/src/lib/i18n/messages patches/ru-locale' \
+            --attempts 3 \
+            --context .github/workflows/build-ru.yml \
+            2>&1 | tee i18n-translate.log
+
+      # Дымовой прогон ловит структурные поломки апстрима здесь, а не на
+      # четырёх сборках сразу. Если патчер не применился или tsc упал,
+      # ci-autofix отдаёт лог удалённой модели и применяет её правки к
+      # patches/ru-locale; исправленные скрипты уезжают в артефакт.
+      - name: Smoke-test Russian locale (self-healing)
+        env:
+          TRANSLATE_API_KEY: ${{ secrets.TRANSLATE_API_KEY }}
+          TRANSLATE_API_USER: ${{ secrets.TRANSLATE_API_USER }}
+          TRANSLATE_API_PASS: ${{ secrets.TRANSLATE_API_PASS }}
+          TRANSLATE_API_BASE: ${{ secrets.TRANSLATE_API_BASE }}
+          TRANSLATE_MODEL: ${{ secrets.TRANSLATE_MODEL }}
+          TRANSLATE_FALLBACK_MODEL: ${{ secrets.TRANSLATE_FALLBACK_MODEL }}
+          TRANSLATE_RESERVE_MODEL: ${{ secrets.TRANSLATE_RESERVE_MODEL }}
+          TRANSLATE_POOL: ${{ secrets.TRANSLATE_POOL }}
+          VERSION: ${{ needs.check-upstream.outputs.new_version }}
+        run: |
+          set -o pipefail
+          node patches/ru-locale/ci-autofix.mjs \
+            --command "bash patches/ru-locale/apply-ru-locale.sh \"$VERSION\" upstream-src && (cd upstream-src && bun install --frozen-lockfile && node_modules/.bin/tsc -b)" \
+            --attempts 3 \
+            --context .github/workflows/build-ru.yml \
+            2>&1 | tee i18n-autofix.log
+
+      - name: Upload sync logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: i18n-sync-logs-${{ needs.check-upstream.outputs.new_version }}
+          path: |
+            i18n-translate.log
+            i18n-autofix.log
+          if-no-files-found: ignore
 
       # Словарь отдаём артефактом: джобы сборки делают checkout на SHA запуска
       # и свежий коммит из main иначе не видят. Артефакт — единственный
@@ -98,10 +171,16 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ru-locale-${{ needs.check-upstream.outputs.new_version }}
+          # Скрипты тоже в артефакте: если self-healing поправил патчер,
+          # сборки должны получить именно исправленную версию, а не ту,
+          # что лежит в SHA запуска.
           path: |
             patches/ru-locale/ru.ts
             patches/ru-locale/ru.settings.ts
             patches/ru-locale/*.i18n.ts
+            patches/ru-locale/*.mjs
+            patches/ru-locale/*.sh
+            patches/ru-locale/pending.json
           if-no-files-found: error
 
       # README держит «Актуальная версия» и ссылки на скачивание. Раньше они
@@ -142,12 +221,13 @@ jobs:
           git config user.name "OpenChamber RU bot"
           git config user.email "bot@users.noreply.github.com"
           git add patches/ru-locale/ru.ts patches/ru-locale/ru.settings.ts \
-                  patches/ru-locale/*.i18n.ts
+                  patches/ru-locale/*.i18n.ts patches/ru-locale/pending.json \
+                  patches/ru-locale/*.mjs patches/ru-locale/*.sh
           if git diff --cached --quiet; then
-            echo "Новых переводов нет — коммит не требуется."
+            echo "Новых переводов и правок нет — коммит не требуется."
             exit 0
           fi
-          git commit -m "i18n: auto-translate new keys for v$VERSION"
+          git commit -m "i18n: auto-translate and self-heal patcher for v$VERSION"
           # Гонка возможна: cron запускается по расписанию, два прогона
           # могут делить ветку. Rebase с повторами вместо молчаливого || true.
           for attempt in 1 2 3 4 5; do
@@ -188,22 +268,28 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Clone original OpenChamber
+      - name: Download upstream source
         run: |
-          git clone --depth 1 --branch "v${{ needs.create-release.outputs.version }}" ${{ env.ORIGINAL_REPO }} build-source || { echo "::error::Тег v${{ needs.create-release.outputs.version }} не найден в upstream — fallback-клон удалён"; exit 1; }
+          set -euo pipefail
+          VERSION="${{ needs.create-release.outputs.version }}"
+          rm -rf build-source && mkdir -p build-source
+          if curl -fsSL --retry 3 --retry-delay 5 \
+               "https://codeload.github.com/openchamber/openchamber/tar.gz/refs/tags/v${VERSION}" \
+               -o /tmp/upstream.tar.gz \
+             && tar -xzf /tmp/upstream.tar.gz -C build-source --strip-components=1; then
+            echo "upstream v$VERSION получен через codeload"
+          else
+            echo "::warning::codeload не сработал — пробуем git clone"
+            rm -rf build-source
+            git clone --depth 1 --branch "v$VERSION" ${{ env.ORIGINAL_REPO }} build-source \
+              || { echo "::error::Тег v$VERSION не найден в upstream"; exit 1; }
+          fi
 
       - name: Download translated locale
         uses: actions/download-artifact@v4
         with:
           name: ru-locale-${{ needs.create-release.outputs.version }}
           path: patches/ru-locale
-
-      - name: Apply Russian locale
-        run: |
-          cd build-source
-          cp ../patches/ru-locale/ru.ts packages/ui/src/lib/i18n/messages/ru.ts
-          cp ../patches/ru-locale/ru.settings.ts packages/ui/src/lib/i18n/messages/ru.settings.ts
-          I18N_STRICT=1 bash ../patches/ru-locale/apply-ru-locale.sh "${{ needs.create-release.outputs.version }}" .
 
       - name: Setup bun
         uses: oven-sh/setup-bun@v2
@@ -215,9 +301,37 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
+      # electron-builder для Linux по умолчанию собирает ещё deb и rpm;
+      # без rpmbuild джоба падает уже после успешной сборки AppImage.
+      - name: Install Linux toolchain
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq rpm build-essential python3 pkg-config libsecret-1-dev
+
       - name: Install dependencies
         working-directory: build-source
         run: bun install --frozen-lockfile
+
+      - name: Apply Russian locale and typecheck (self-healing)
+        env:
+          TRANSLATE_API_KEY: ${{ secrets.TRANSLATE_API_KEY }}
+          TRANSLATE_API_USER: ${{ secrets.TRANSLATE_API_USER }}
+          TRANSLATE_API_PASS: ${{ secrets.TRANSLATE_API_PASS }}
+          TRANSLATE_API_BASE: ${{ secrets.TRANSLATE_API_BASE }}
+          TRANSLATE_MODEL: ${{ secrets.TRANSLATE_MODEL }}
+          TRANSLATE_FALLBACK_MODEL: ${{ secrets.TRANSLATE_FALLBACK_MODEL }}
+          TRANSLATE_RESERVE_MODEL: ${{ secrets.TRANSLATE_RESERVE_MODEL }}
+          TRANSLATE_POOL: ${{ secrets.TRANSLATE_POOL }}
+          VERSION: ${{ needs.create-release.outputs.version }}
+        run: |
+          set -o pipefail
+          # Без I18N_STRICT: непереведённые ключи — предупреждение, а не
+          # остановка сборки. Структурные ошибки патчера лечит авторемонт.
+          node patches/ru-locale/ci-autofix.mjs \
+            --command "bash patches/ru-locale/apply-ru-locale.sh \"$VERSION\" build-source && (cd build-source && node_modules/.bin/tsc -b)" \
+            --attempts 3 \
+            --context .github/workflows/build-ru.yml \
+            2>&1 | tee autofix-apply.log
 
       - name: Cache OpenCode CLI
         uses: actions/cache@v4
@@ -226,18 +340,33 @@ jobs:
           key: opencode-cli-linux-x64-${{ needs.create-release.outputs.version }}
           restore-keys: opencode-cli-linux-x64-
 
-      - name: Build AppImage
-        working-directory: build-source/packages/electron
+      - name: Build AppImage (self-healing)
+        env:
+          TRANSLATE_API_KEY: ${{ secrets.TRANSLATE_API_KEY }}
+          TRANSLATE_API_USER: ${{ secrets.TRANSLATE_API_USER }}
+          TRANSLATE_API_PASS: ${{ secrets.TRANSLATE_API_PASS }}
+          TRANSLATE_API_BASE: ${{ secrets.TRANSLATE_API_BASE }}
+          TRANSLATE_MODEL: ${{ secrets.TRANSLATE_MODEL }}
+          TRANSLATE_FALLBACK_MODEL: ${{ secrets.TRANSLATE_FALLBACK_MODEL }}
+          TRANSLATE_RESERVE_MODEL: ${{ secrets.TRANSLATE_RESERVE_MODEL }}
+          TRANSLATE_POOL: ${{ secrets.TRANSLATE_POOL }}
         run: |
-          set -euo pipefail
-          bun run build:web-assets
-          bun run prepare:opencode-cli
-          # C 2.5.0 апстрим упаковывает ripgrep внутрь ресурсов и electron-builder
-          # валит сборку, не найдя resources/ripgrep/rg («run prepare:ripgrep»).
-          bun run prepare:ripgrep
-          bun run bundle:main
-          bun run rebuild:native
-          bunx electron-builder --linux --x64 --publish=never
+          set -o pipefail
+          node patches/ru-locale/ci-autofix.mjs \
+            --command "cd build-source/packages/electron && bun run build:web-assets && bun run prepare:opencode-cli && bun run prepare:ripgrep && bun run bundle:main && bun run rebuild:native && bunx electron-builder --linux --x64 --publish=never" \
+            --attempts 2 \
+            --context .github/workflows/build-ru.yml \
+            2>&1 | tee autofix-build.log
+
+      - name: Upload build logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-logs-linux-${{ needs.create-release.outputs.version }}
+          path: |
+            autofix-apply.log
+            autofix-build.log
+          if-no-files-found: ignore
 
       - name: Rename AppImage to OpenChamber_ru
         run: |
@@ -259,9 +388,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Clone original OpenChamber
+      - name: Download upstream source
         run: |
-          git clone --depth 1 --branch "v${{ needs.create-release.outputs.version }}" ${{ env.ORIGINAL_REPO }} build-source || { echo "::error::Тег v${{ needs.create-release.outputs.version }} не найден в upstream — fallback-клон удалён"; exit 1; }
+          set -euo pipefail
+          VERSION="${{ needs.create-release.outputs.version }}"
+          rm -rf build-source && mkdir -p build-source
+          if curl -fsSL --retry 3 --retry-delay 5 \
+               "https://codeload.github.com/openchamber/openchamber/tar.gz/refs/tags/v${VERSION}" \
+               -o /tmp/upstream.tar.gz \
+             && tar -xzf /tmp/upstream.tar.gz -C build-source --strip-components=1; then
+            echo "upstream v$VERSION получен через codeload"
+          else
+            echo "::warning::codeload не сработал — пробуем git clone"
+            rm -rf build-source
+            git clone --depth 1 --branch "v$VERSION" ${{ env.ORIGINAL_REPO }} build-source \
+              || { echo "::error::Тег v$VERSION не найден в upstream"; exit 1; }
+          fi
 
       - name: Download translated locale
         uses: actions/download-artifact@v4
@@ -269,18 +411,11 @@ jobs:
           name: ru-locale-${{ needs.create-release.outputs.version }}
           path: patches/ru-locale
 
-      - name: Apply Russian locale
-        run: |
-          cd build-source
-          cp ../patches/ru-locale/ru.ts packages/ui/src/lib/i18n/messages/ru.ts
-          cp ../patches/ru-locale/ru.settings.ts packages/ui/src/lib/i18n/messages/ru.settings.ts
-          I18N_STRICT=1 bash ../patches/ru-locale/apply-ru-locale.sh "${{ needs.create-release.outputs.version }}" .
-
-      - name: Install wine
+      - name: Install wine and build toolchain
         run: |
           sudo dpkg --add-architecture i386
           sudo apt-get update -qq
-          sudo apt-get install -y -qq wine64
+          sudo apt-get install -y -qq wine64 build-essential python3 pkg-config
 
       - name: Setup bun
         uses: oven-sh/setup-bun@v2
@@ -296,6 +431,25 @@ jobs:
         working-directory: build-source
         run: bun install --frozen-lockfile
 
+      - name: Apply Russian locale and typecheck (self-healing)
+        env:
+          TRANSLATE_API_KEY: ${{ secrets.TRANSLATE_API_KEY }}
+          TRANSLATE_API_USER: ${{ secrets.TRANSLATE_API_USER }}
+          TRANSLATE_API_PASS: ${{ secrets.TRANSLATE_API_PASS }}
+          TRANSLATE_API_BASE: ${{ secrets.TRANSLATE_API_BASE }}
+          TRANSLATE_MODEL: ${{ secrets.TRANSLATE_MODEL }}
+          TRANSLATE_FALLBACK_MODEL: ${{ secrets.TRANSLATE_FALLBACK_MODEL }}
+          TRANSLATE_RESERVE_MODEL: ${{ secrets.TRANSLATE_RESERVE_MODEL }}
+          TRANSLATE_POOL: ${{ secrets.TRANSLATE_POOL }}
+          VERSION: ${{ needs.create-release.outputs.version }}
+        run: |
+          set -o pipefail
+          node patches/ru-locale/ci-autofix.mjs \
+            --command "bash patches/ru-locale/apply-ru-locale.sh \"$VERSION\" build-source && (cd build-source && node_modules/.bin/tsc -b)" \
+            --attempts 3 \
+            --context .github/workflows/build-ru.yml \
+            2>&1 | tee autofix-apply.log
+
       - name: Cache OpenCode CLI
         uses: actions/cache@v4
         with:
@@ -303,18 +457,33 @@ jobs:
           key: opencode-cli-win-x64-${{ needs.create-release.outputs.version }}
           restore-keys: opencode-cli-win-x64-
 
-      - name: Build Windows installer
-        working-directory: build-source/packages/electron
+      - name: Build Windows installer (self-healing)
+        env:
+          TRANSLATE_API_KEY: ${{ secrets.TRANSLATE_API_KEY }}
+          TRANSLATE_API_USER: ${{ secrets.TRANSLATE_API_USER }}
+          TRANSLATE_API_PASS: ${{ secrets.TRANSLATE_API_PASS }}
+          TRANSLATE_API_BASE: ${{ secrets.TRANSLATE_API_BASE }}
+          TRANSLATE_MODEL: ${{ secrets.TRANSLATE_MODEL }}
+          TRANSLATE_FALLBACK_MODEL: ${{ secrets.TRANSLATE_FALLBACK_MODEL }}
+          TRANSLATE_RESERVE_MODEL: ${{ secrets.TRANSLATE_RESERVE_MODEL }}
+          TRANSLATE_POOL: ${{ secrets.TRANSLATE_POOL }}
         run: |
-          set -euo pipefail
-          bun run build:web-assets
-          bun run prepare:opencode-cli
-          # C 2.5.0 апстрим упаковывает ripgrep внутрь ресурсов и electron-builder
-          # валит сборку, не найдя resources/ripgrep/rg («run prepare:ripgrep»).
-          bun run prepare:ripgrep
-          bun run bundle:main
-          bun run rebuild:native
-          bunx electron-builder --win nsis --x64 --publish=never
+          set -o pipefail
+          node patches/ru-locale/ci-autofix.mjs \
+            --command "cd build-source/packages/electron && bun run build:web-assets && bun run prepare:opencode-cli && bun run prepare:ripgrep && bun run bundle:main && bun run rebuild:native && bunx electron-builder --win nsis --x64 --publish=never" \
+            --attempts 2 \
+            --context .github/workflows/build-ru.yml \
+            2>&1 | tee autofix-build.log
+
+      - name: Upload build logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-logs-windows-${{ needs.create-release.outputs.version }}
+          path: |
+            autofix-apply.log
+            autofix-build.log
+          if-no-files-found: ignore
 
       - name: Rename Windows installer to OpenChamber_ru
         run: |
@@ -336,22 +505,28 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Clone original OpenChamber
+      - name: Download upstream source
         run: |
-          git clone --depth 1 --branch "v${{ needs.create-release.outputs.version }}" ${{ env.ORIGINAL_REPO }} build-source || { echo "::error::Тег v${{ needs.create-release.outputs.version }} не найден в upstream — fallback-клон удалён"; exit 1; }
+          set -euo pipefail
+          VERSION="${{ needs.create-release.outputs.version }}"
+          rm -rf build-source && mkdir -p build-source
+          if curl -fsSL --retry 3 --retry-delay 5 \
+               "https://codeload.github.com/openchamber/openchamber/tar.gz/refs/tags/v${VERSION}" \
+               -o /tmp/upstream.tar.gz \
+             && tar -xzf /tmp/upstream.tar.gz -C build-source --strip-components=1; then
+            echo "upstream v$VERSION получен через codeload"
+          else
+            echo "::warning::codeload не сработал — пробуем git clone"
+            rm -rf build-source
+            git clone --depth 1 --branch "v$VERSION" ${{ env.ORIGINAL_REPO }} build-source \
+              || { echo "::error::Тег v$VERSION не найден в upstream"; exit 1; }
+          fi
 
       - name: Download translated locale
         uses: actions/download-artifact@v4
         with:
           name: ru-locale-${{ needs.create-release.outputs.version }}
           path: patches/ru-locale
-
-      - name: Apply Russian locale
-        run: |
-          cd build-source
-          cp ../patches/ru-locale/ru.ts packages/ui/src/lib/i18n/messages/ru.ts
-          cp ../patches/ru-locale/ru.settings.ts packages/ui/src/lib/i18n/messages/ru.settings.ts
-          I18N_STRICT=1 bash ../patches/ru-locale/apply-ru-locale.sh "${{ needs.create-release.outputs.version }}" .
 
       - name: Setup bun
         uses: oven-sh/setup-bun@v2
@@ -367,6 +542,25 @@ jobs:
         working-directory: build-source
         run: bun install --frozen-lockfile
 
+      - name: Apply Russian locale and typecheck (self-healing)
+        env:
+          TRANSLATE_API_KEY: ${{ secrets.TRANSLATE_API_KEY }}
+          TRANSLATE_API_USER: ${{ secrets.TRANSLATE_API_USER }}
+          TRANSLATE_API_PASS: ${{ secrets.TRANSLATE_API_PASS }}
+          TRANSLATE_API_BASE: ${{ secrets.TRANSLATE_API_BASE }}
+          TRANSLATE_MODEL: ${{ secrets.TRANSLATE_MODEL }}
+          TRANSLATE_FALLBACK_MODEL: ${{ secrets.TRANSLATE_FALLBACK_MODEL }}
+          TRANSLATE_RESERVE_MODEL: ${{ secrets.TRANSLATE_RESERVE_MODEL }}
+          TRANSLATE_POOL: ${{ secrets.TRANSLATE_POOL }}
+          VERSION: ${{ needs.create-release.outputs.version }}
+        run: |
+          set -o pipefail
+          node patches/ru-locale/ci-autofix.mjs \
+            --command "bash patches/ru-locale/apply-ru-locale.sh \"$VERSION\" build-source && (cd build-source && node_modules/.bin/tsc -b)" \
+            --attempts 3 \
+            --context .github/workflows/build-ru.yml \
+            2>&1 | tee autofix-apply.log
+
       - name: Cache OpenCode CLI
         uses: actions/cache@v4
         with:
@@ -374,23 +568,35 @@ jobs:
           key: opencode-cli-mac-x64-${{ needs.create-release.outputs.version }}
           restore-keys: opencode-cli-mac-x64-
 
-      - name: Build macOS app (unsigned DMG + ZIP)
-        working-directory: build-source/packages/electron
+      - name: Build macOS app (unsigned DMG + ZIP, self-healing)
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
           NODE_OPTIONS: '--max-old-space-size=8192'
+          TRANSLATE_API_KEY: ${{ secrets.TRANSLATE_API_KEY }}
+          TRANSLATE_API_USER: ${{ secrets.TRANSLATE_API_USER }}
+          TRANSLATE_API_PASS: ${{ secrets.TRANSLATE_API_PASS }}
+          TRANSLATE_API_BASE: ${{ secrets.TRANSLATE_API_BASE }}
+          TRANSLATE_MODEL: ${{ secrets.TRANSLATE_MODEL }}
+          TRANSLATE_FALLBACK_MODEL: ${{ secrets.TRANSLATE_FALLBACK_MODEL }}
+          TRANSLATE_RESERVE_MODEL: ${{ secrets.TRANSLATE_RESERVE_MODEL }}
+          TRANSLATE_POOL: ${{ secrets.TRANSLATE_POOL }}
         run: |
-          set -euo pipefail
-          bun run build:web-assets
-          bun run prepare:opencode-cli
-          # C 2.5.0 апстрим упаковывает ripgrep внутрь ресурсов и electron-builder
-          # валит сборку, не найдя resources/ripgrep/rg («run prepare:ripgrep»).
-          bun run prepare:ripgrep
-          bun run bundle:main
-          bun run rebuild:native
-          bunx electron-builder --mac --x64 --publish=never \
-            --config.mac.notarize=false \
-            --config.mac.hardenedRuntime=false
+          set -o pipefail
+          node patches/ru-locale/ci-autofix.mjs \
+            --command "cd build-source/packages/electron && bun run build:web-assets && bun run prepare:opencode-cli && bun run prepare:ripgrep && bun run bundle:main && bun run rebuild:native && bunx electron-builder --mac --x64 --publish=never --config.mac.notarize=false --config.mac.hardenedRuntime=false" \
+            --attempts 2 \
+            --context .github/workflows/build-ru.yml \
+            2>&1 | tee autofix-build.log
+
+      - name: Upload build logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-logs-macos-${{ needs.create-release.outputs.version }}
+          path: |
+            autofix-apply.log
+            autofix-build.log
+          if-no-files-found: ignore
 
       - name: Rename macOS artifacts to OpenChamber_ru
         run: |
@@ -416,22 +622,28 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Clone original OpenChamber
+      - name: Download upstream source
         run: |
-          git clone --depth 1 --branch "v${{ needs.create-release.outputs.version }}" ${{ env.ORIGINAL_REPO }} build-source || { echo "::error::Тег v${{ needs.create-release.outputs.version }} не найден в upstream — fallback-клон удалён"; exit 1; }
+          set -euo pipefail
+          VERSION="${{ needs.create-release.outputs.version }}"
+          rm -rf build-source && mkdir -p build-source
+          if curl -fsSL --retry 3 --retry-delay 5 \
+               "https://codeload.github.com/openchamber/openchamber/tar.gz/refs/tags/v${VERSION}" \
+               -o /tmp/upstream.tar.gz \
+             && tar -xzf /tmp/upstream.tar.gz -C build-source --strip-components=1; then
+            echo "upstream v$VERSION получен через codeload"
+          else
+            echo "::warning::codeload не сработал — пробуем git clone"
+            rm -rf build-source
+            git clone --depth 1 --branch "v$VERSION" ${{ env.ORIGINAL_REPO }} build-source \
+              || { echo "::error::Тег v$VERSION не найден в upstream"; exit 1; }
+          fi
 
       - name: Download translated locale
         uses: actions/download-artifact@v4
         with:
           name: ru-locale-${{ needs.create-release.outputs.version }}
           path: patches/ru-locale
-
-      - name: Apply Russian locale
-        run: |
-          cd build-source
-          cp ../patches/ru-locale/ru.ts packages/ui/src/lib/i18n/messages/ru.ts
-          cp ../patches/ru-locale/ru.settings.ts packages/ui/src/lib/i18n/messages/ru.settings.ts
-          I18N_STRICT=1 bash ../patches/ru-locale/apply-ru-locale.sh "${{ needs.create-release.outputs.version }}" .
 
       - name: Setup bun
         uses: oven-sh/setup-bun@v2
@@ -453,11 +665,55 @@ jobs:
         working-directory: build-source
         run: bun install --frozen-lockfile
 
-      - name: Build APK
-        working-directory: build-source/packages/mobile
+      - name: Apply Russian locale (self-healing)
         env:
-          ANDROID_HOME: ${{ env.ANDROID_HOME }}
-        run: bun run build:android:debug
+          TRANSLATE_API_KEY: ${{ secrets.TRANSLATE_API_KEY }}
+          TRANSLATE_API_USER: ${{ secrets.TRANSLATE_API_USER }}
+          TRANSLATE_API_PASS: ${{ secrets.TRANSLATE_API_PASS }}
+          TRANSLATE_API_BASE: ${{ secrets.TRANSLATE_API_BASE }}
+          TRANSLATE_MODEL: ${{ secrets.TRANSLATE_MODEL }}
+          TRANSLATE_FALLBACK_MODEL: ${{ secrets.TRANSLATE_FALLBACK_MODEL }}
+          TRANSLATE_RESERVE_MODEL: ${{ secrets.TRANSLATE_RESERVE_MODEL }}
+          TRANSLATE_POOL: ${{ secrets.TRANSLATE_POOL }}
+          VERSION: ${{ needs.create-release.outputs.version }}
+        run: |
+          set -o pipefail
+          node patches/ru-locale/ci-autofix.mjs \
+            --command "bash patches/ru-locale/apply-ru-locale.sh \"$VERSION\" build-source" \
+            --attempts 3 \
+            --context .github/workflows/build-ru.yml \
+            2>&1 | tee autofix-apply.log
+
+      - name: Build APK (self-healing)
+        env:
+          # ANDROID_HOME намеренно не задаём: раннер уже экспортирует путь
+          # к установленному SDK, а `${{ env.ANDROID_HOME }}` в env шага
+          # подставил бы пустую строку и сломал сборку.
+          TRANSLATE_API_KEY: ${{ secrets.TRANSLATE_API_KEY }}
+          TRANSLATE_API_USER: ${{ secrets.TRANSLATE_API_USER }}
+          TRANSLATE_API_PASS: ${{ secrets.TRANSLATE_API_PASS }}
+          TRANSLATE_API_BASE: ${{ secrets.TRANSLATE_API_BASE }}
+          TRANSLATE_MODEL: ${{ secrets.TRANSLATE_MODEL }}
+          TRANSLATE_FALLBACK_MODEL: ${{ secrets.TRANSLATE_FALLBACK_MODEL }}
+          TRANSLATE_RESERVE_MODEL: ${{ secrets.TRANSLATE_RESERVE_MODEL }}
+          TRANSLATE_POOL: ${{ secrets.TRANSLATE_POOL }}
+        run: |
+          set -o pipefail
+          node patches/ru-locale/ci-autofix.mjs \
+            --command "cd build-source/packages/mobile && bun run build:android:debug" \
+            --attempts 2 \
+            --context .github/workflows/build-ru.yml \
+            2>&1 | tee autofix-build.log
+
+      - name: Upload build logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-logs-android-${{ needs.create-release.outputs.version }}
+          path: |
+            autofix-apply.log
+            autofix-build.log
+          if-no-files-found: ignore
 
       - name: Rename APK
         run: |
