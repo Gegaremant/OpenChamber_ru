@@ -35,7 +35,7 @@ export const firstPartyIntegrationsI18n = {
     'settings.integrations.tracker.updateApp': 'Обновите OpenChamber, чтобы подключить {provider} здесь.',
     'settings.integrations.tracker.mapping.defaultProject': 'Проект по умолчанию',
     'settings.integrations.linear.mapping.defaultProject.info': 'Новые сессии по задачам Linear используют этот проект, если у команды задачи нет собственной привязки.',
-    'settings.integrations.tracker.mapping.defaultProject.info': '"Новые сессии по задачам {provider} используют этот проект, если у группы задачи нет собственной привязки."',
+    'settings.integrations.tracker.mapping.defaultProject.info': 'Новые сессии по задачам {provider} используют этот проект, если у группы задачи нет собственной привязки.',
     'settings.integrations.tracker.mapping.defaultProject.none': 'Нет',
     'settings.integrations.tracker.mapping.defaultProject.aria': 'Проект по умолчанию для задач {provider}',
     'settings.integrations.linear.mapping.teams': 'Проекты команд',
