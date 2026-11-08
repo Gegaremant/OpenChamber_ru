@@ -14,5 +14,7 @@ export const secretRequestI18n = {
     'settings.openchamber.tools.field.agentSecretToolAria': 'Agent secret tool',
     'settings.openchamber.tools.field.agentSecretToolSummary': 'Let agents ask you for an API key, token or password on a private card in the chat. The value stays out of the conversation.',
     'settings.openchamber.tools.field.agentSecretToolInfo': 'A saved value goes to a file on the machine running OpenChamber, where your agents\' commands can read it. The file is deleted after 24 hours.',
+    'chat.secretRequest.showSecret': 'Show secret',
+    'chat.secretRequest.hideSecret': 'Hide secret',
   },
 };

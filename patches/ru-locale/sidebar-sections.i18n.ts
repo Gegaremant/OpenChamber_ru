@@ -84,5 +84,8 @@ export const sidebarSectionsI18n = {
     'sessions.sidebar.sections.save': 'Save',
     'sessions.sidebar.sections.previewMark': 'Preview',
     'sessions.sidebar.sections.empty': 'Nothing here yet',
+    'sessions.sidebar.folders.newFolderTitle': 'New folder',
+    'sessions.sidebar.folders.newFolderCreate': 'Create and move',
+    'sessions.sidebar.sections.category.folders': 'Folder',
   },
 };

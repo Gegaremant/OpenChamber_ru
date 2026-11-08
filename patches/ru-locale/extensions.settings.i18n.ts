@@ -158,5 +158,13 @@ export const extensionsSettingsI18n = {
     'settings.extensions.capability.transcript': 'Read what the agent says in the background',
     'settings.extensions.capability.transcript.detail': 'The final answer of each turn, the questions it asks and what it asks permission for, in every project, sent to its local service. Allow only if you trust where the extension sends it.',
     'settings.extensions.service.sessionEvents': 'Session events: {list}',
+    'settings.extensions.capability.opencode': 'Read OpenCode sessions',
+    'settings.extensions.capability.opencode.detail': 'Reads sessions, messages, projects and live events from the OpenCode this app uses. It can only read.',
+    'settings.extensions.toast.invalidOpenCodePlugin': 'The OpenCode plugin folder named in package.json is missing, or has no entry file OpenCode can load: index.js or server.js at its root, or name and exports in its own package.json.',
+    'settings.extensions.capability.service.providesQuota': 'Reports usage like a built-in provider, with the credentials OpenCode holds for:',
+    'settings.extensions.capability.service.providesQuota.credentials': 'Receives those credentials on every refresh, and nothing else from OpenCode.',
+    'settings.extensions.capability.service.providesQuota.none': 'Reports usage like a built-in provider. It receives no credentials from OpenCode.',
+    'settings.extensions.service.providesQuota': 'Reports usage like a built-in provider, with the credentials OpenCode holds for {list}.',
+    'settings.extensions.service.providesQuota.none': 'Reports usage like a built-in provider; it receives no credentials from OpenCode.',
   },
 } as const;

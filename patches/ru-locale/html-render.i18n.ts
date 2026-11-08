@@ -17,5 +17,7 @@ export const htmlRenderI18n = {
     'chat.htmlRender.answerFailed': 'Не удалось отправить ответ',
     'chat.htmlRender.chatSentEarlier': 'You wrote in the chat before this page',
     'chat.htmlRender.notDrawn': 'Sent back to the agent to fix',
+    'chat.htmlRender.decline': 'Decline',
+    'chat.htmlRender.declined': 'Declined',
   },
 };

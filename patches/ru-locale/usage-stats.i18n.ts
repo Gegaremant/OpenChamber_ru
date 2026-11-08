@@ -60,5 +60,6 @@ export const usageStatsI18n = {
     'usageStats.tools.caption': 'Чтобы их посчитать, нужно прочитать все сообщения за период, поэтому они загружаются по запросу.',
     'usageStats.tools.load': 'Показать вызовы инструментов',
     'usageStats.tools.loadFailed': 'Не удалось загрузить вызовы инструментов',
+    'usageStats.range.1d': 'Today',
   },
 } as const;

@@ -72,5 +72,6 @@ export const overviewI18n = {
     'overview.toast.inUse': '{name} открыто в приложении, поэтому оно оставлено как есть',
     'overview.toast.unknown': 'Не удалось проверить, работает ли агент в {name}, поэтому оно оставлено как есть',
     'overview.toast.removeFailed': 'Не удалось очистить {name}',
+    'overview.activity.image': 'generating image',
   },
 };

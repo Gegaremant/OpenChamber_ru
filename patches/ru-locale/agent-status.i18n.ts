@@ -77,5 +77,6 @@ export const agentStatusI18n = {
     'chat.agentStatus.retry.inAttempt': 'Retrying in {time} (attempt {attempt})',
     'chat.agentStatus.limit.today': 'Limit resets at {time}',
     'chat.agentStatus.limit.later': 'Limit resets {date}, {time}',
+    'chat.agentStatus.usage': 'checking usage limits',
   },
 };

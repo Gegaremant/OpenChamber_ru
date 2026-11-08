@@ -18,5 +18,6 @@ export const uiBlocksI18n = {
     'chat.uiBlock.chart.largest': 'Largest',
     'chat.uiBlock.chart.average': 'Average',
     'chat.uiBlock.chart.total': 'Total',
+    'chat.uiBlock.partial': 'Part of this block could not be drawn.',
   },
 };
