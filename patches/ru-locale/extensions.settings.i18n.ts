@@ -166,5 +166,8 @@ export const extensionsSettingsI18n = {
     'settings.extensions.capability.service.providesQuota.none': 'Reports usage like a built-in provider. It receives no credentials from OpenCode.',
     'settings.extensions.service.providesQuota': 'Reports usage like a built-in provider, with the credentials OpenCode holds for {list}.',
     'settings.extensions.service.providesQuota.none': 'Reports usage like a built-in provider; it receives no credentials from OpenCode.',
+    'settings.extensions.capability.wake': 'Wake agents that wait on it',
+    'settings.extensions.capability.wake.detail': 'An agent can wait on one of these. When it fires, a message from the extension starts the agent\'s next turn in that session. Allow only if you trust what the extension writes.',
+    'settings.extensions.service.waits': 'Wakes agents waiting on: {list}',
   },
 } as const;

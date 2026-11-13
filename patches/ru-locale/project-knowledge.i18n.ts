@@ -31,5 +31,13 @@ export const projectKnowledgeI18n = {
     'rightSidebar.contextNotesTodo.plans.progress.done': 'Готово',
     'rightSidebar.contextNotesTodo.plans.progress.title': 'Выполнено {done} из {total} шагов',
     'rightSidebar.contextNotesTodo.plans.session.open': 'Открыть сессию, работающую над этим планом',
+    'rightSidebar.contextNotesTodo.composer.add': 'Add',
+    'rightSidebar.contextNotesTodo.todo.menu.edit': 'Edit',
+    'rightSidebar.contextNotesTodo.todo.actions.editAria': 'Edit todo "{text}"',
+    'rightSidebar.contextNotesTodo.todo.waitingFor': 'Waits for: {todos}',
+    'rightSidebar.contextNotesTodo.todo.openPlan': 'Open plan',
+    'planView.toast.copied': 'Plan copied',
+    'planView.todos.title': 'Todos',
+    'rightSidebar.contextNotesTodo.toast.movePlanUnsaved': 'The plan\'s latest edits could not be saved, so it stayed where it was.',
   },
 };

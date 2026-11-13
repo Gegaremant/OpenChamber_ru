@@ -42,5 +42,7 @@ export const pluginPanelI18n = {
     'chat.chatInput.toast.guestCommandFailed': '/{command} завершилась с ошибкой: {reason}',
     'chat.chatInput.toast.guestCommandUnavailable': '{name} не ответил.',
     'chat.chatInput.toast.guestUnavailableHere': 'Это расширение здесь недоступно. Откройте его в веб-версии или настольной версии OpenChamber.',
+    'contextPanel.plugin.linkDialog.description': 'The extension is showing the identifier or link you clicked.',
+    'chat.chatInput.toast.guestNotOnPhone': '{name} does not open on the phone. Open it in OpenChamber on the web or desktop.',
   },
 } as const;

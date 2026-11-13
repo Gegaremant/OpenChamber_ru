@@ -25,5 +25,10 @@ export const sidebarWorkI18n = {
     'chat.draftTarget.drafts.heading': 'Черновики',
     'chat.draftTarget.drafts.triggerSingle': '{count} черновик',
     'chat.draftTarget.drafts.triggerPlural': '{count} черновиков',
+    'sessions.sidebar.header.displayMode.keepPinnedInPlace': 'Also show pinned under projects',
+    'sessions.sidebar.bulkActions.markedDoneSingle': 'Marked {count} session done',
+    'sessions.sidebar.bulkActions.markedDonePlural': 'Marked {count} sessions done',
+    'sessions.sidebar.bulkActions.failedMarkDoneSingle': 'Couldn\'t mark {count} session done',
+    'sessions.sidebar.bulkActions.failedMarkDonePlural': 'Couldn\'t mark {count} sessions done',
   },
 };

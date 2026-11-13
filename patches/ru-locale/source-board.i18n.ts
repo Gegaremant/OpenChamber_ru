@@ -115,5 +115,8 @@ export const sourceBoardI18n = {
     'sourceBoard.actions.reopenPull.pullRequest': 'Переоткрыть пулл-реквест',
     'sourceBoard.actions.reopenPull.mergeRequest': 'Переоткрыть мерж-реквест',
     'sourceBoard.actions.reopenPull.change': 'Восстановить изменение',
+    'sourceBoard.actions.convertToDraft': 'Convert to draft',
+    'sourceBoard.toast.markedDraft': '{reference} is now a draft',
+    'sourceBoard.toast.markDraftFailed': 'Could not convert {reference} to a draft',
   },
 };

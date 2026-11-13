@@ -32,5 +32,13 @@ export const worktreeArchiveI18n = {
     'settings.openchamber.finishedWorktrees.info': 'Archiving removes the worktree folder; its branch, changes and sessions wait in Archive, ready to restore. Nothing is archived while an agent is working there.',
     'settings.openchamber.finishedWorktrees.field.archiveOnDone': 'Archive a worktree when you mark it done',
     'settings.openchamber.mergedWorktreeCleanup.field.enable': 'Archive a worktree after its PR is merged',
+    'sessions.sidebar.sessionDialogs.actions.keepSessions': 'Keep sessions in the project',
+    'sessions.sidebar.dialogs.worktreeDelete.descriptionOneLinkedKept': 'This removes the selected worktree and moves {count} linked session to the project.',
+    'sessions.sidebar.dialogs.worktreeDelete.descriptionManyLinkedKept': 'This removes the selected worktree and moves {count} linked sessions to the project.',
+    'mobile.projectEdit.deleteWorktreeKeepNote': '{count} attached session(s) will move to the project.',
+    'sessions.sidebar.dialogs.worktreeDelete.keepAdded': 'A session started there meanwhile, so the worktree was kept.',
+    'sessions.sidebar.dialogs.worktreeDelete.keepUnconfirmed': 'A session hasn\'t finished moving to the project, so the worktree was kept. Try again in a moment.',
+    'sessions.sidebar.dialogs.worktreeDelete.keepSwitched': 'The app switched to another server, so the worktree was kept.',
+    'sessions.sidebar.dialogs.worktreeDelete.keepOutcomeUnknown': 'A session\'s move lost its answer, so the worktree was kept. The session may already be in the project.',
   },
 };

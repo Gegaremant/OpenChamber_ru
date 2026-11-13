@@ -87,5 +87,7 @@ export const sidebarSectionsI18n = {
     'sessions.sidebar.folders.newFolderTitle': 'New folder',
     'sessions.sidebar.folders.newFolderCreate': 'Create and move',
     'sessions.sidebar.sections.category.folders': 'Folder',
+    'sessions.sidebar.sections.customize': 'Customize sections',
+    'sessions.sidebar.activity.pagesTitle': 'Pages',
   },
 };

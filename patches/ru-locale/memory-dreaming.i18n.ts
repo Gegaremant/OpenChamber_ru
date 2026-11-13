@@ -1,0 +1,27 @@
+/** Русский блок для memory-dreaming.i18n.ts — вставляется в свежий файл апстрима. */
+export const memoryDreamingI18n = {
+  ru: {
+    'settings.openchamber.tools.dreaming.label': 'Organize memory',
+    'settings.openchamber.tools.dreaming.info': 'Once a day, while no session is running, an agent tidies memory in the background: it merges duplicates and removes what went out of date or is already in the project\'s docs. The Memory panel shows what changed, with an undo.',
+    'settings.openchamber.tools.dreaming.aria': 'Tidy memory in the background',
+    'settings.openchamber.tools.dreamingModel.searchTitle': 'Model for organizing memory',
+    'settings.openchamber.tools.dreamingModel.default': 'Default model',
+    'settings.openchamber.tools.dreamingModel.thinking': 'Thinking level for organizing memory',
+    'rightSidebar.contextNotesTodo.memory.dream.tidied': 'Tidied on {date}',
+    'rightSidebar.contextNotesTodo.memory.dream.nothing': 'Checked on {date}: nothing to tidy',
+    'rightSidebar.contextNotesTodo.memory.dream.failed': 'The tidy-up on {date} did not finish',
+    'rightSidebar.contextNotesTodo.memory.dream.undone': 'The tidy-up of {date} was undone',
+    'rightSidebar.contextNotesTodo.memory.dream.merged': 'merged: {count}',
+    'rightSidebar.contextNotesTodo.memory.dream.removed': 'removed: {count}',
+    'rightSidebar.contextNotesTodo.memory.dream.rewritten': 'rewritten: {count}',
+    'rightSidebar.contextNotesTodo.memory.dream.undo': 'Undo',
+    'rightSidebar.contextNotesTodo.memory.dream.undoFailed': 'Could not undo the tidy-up.',
+    'rightSidebar.contextNotesTodo.memory.toDocs.summary': 'Belong in the project\'s docs: {count}',
+    'rightSidebar.contextNotesTodo.memory.toDocs.action': 'Move',
+    'rightSidebar.contextNotesTodo.memory.toDocs.sessionTitle': 'Memory to project docs',
+    'rightSidebar.contextNotesTodo.memory.toDocs.failed': 'Could not start moving the entries.',
+    'settings.magicPrompts.sidebar.item.memoryToDocs': 'Move to docs',
+    'settings.magicPrompts.page.group.memoryToDocs.title': 'Memory to project docs',
+    'settings.magicPrompts.page.group.memoryToDocs.description': 'Prompts used when the Memory panel offers to move entries into the project\'s agent docs: visible user message + hidden instructions, followed by the entries. The agent adds each one to the right AGENTS.md, skill or module doc, deletes it from memory, and leaves the edits uncommitted.',
+  },
+};

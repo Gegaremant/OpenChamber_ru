@@ -16,5 +16,12 @@ export const secretRequestI18n = {
     'settings.openchamber.tools.field.agentSecretToolInfo': 'A saved value goes to a file on the machine running OpenChamber, where your agents\' commands can read it. The file is deleted after 24 hours.',
     'chat.secretRequest.showSecret': 'Show secret',
     'chat.secretRequest.hideSecret': 'Hide secret',
+    'chat.secretRun.title': 'Secrets for {program}',
+    'chat.secretRun.commandLabel': 'Command that gets the secrets',
+    'chat.secretRun.remember': 'Remember in this chat for 10 minutes',
+    'chat.secretRun.reused': 'Remembered in this chat: {labels}',
+    'chat.secretRun.privacy': 'Goes only to this command, never into the chat or a file',
+    'chat.secretRun.submit': 'Run',
+    'chat.secretRun.sendFailed': 'The secrets were not sent',
   },
 };

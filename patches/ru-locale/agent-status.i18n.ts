@@ -78,5 +78,9 @@ export const agentStatusI18n = {
     'chat.agentStatus.limit.today': 'Limit resets at {time}',
     'chat.agentStatus.limit.later': 'Limit resets {date}, {time}',
     'chat.agentStatus.usage': 'checking usage limits',
+    'chat.agentStatus.sessions.unlink': 'removing a link from the work',
+    'chat.agentStatus.sessions.markDone': 'marking a session done',
+    'chat.agentStatus.sessions.track': 'putting a session in work',
+    'chat.agentStatus.secretRun': 'running a command with secrets',
   },
 };

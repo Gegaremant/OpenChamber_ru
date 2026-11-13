@@ -15,5 +15,6 @@ export const surfacePanelI18n = {
     'contextPanel.surface.ended.service-stopped': 'Служба расширения остановилась.',
     'contextPanel.surface.ended.extension-unavailable': 'Расширение недоступно. Проверьте Настройки → Расширения.',
     'contextPanel.surface.ended.host-shutdown': 'OpenChamber завершает работу.',
+    'contextPanel.surface.status.readyTouch': 'Tap to take control',
   },
 } as const;

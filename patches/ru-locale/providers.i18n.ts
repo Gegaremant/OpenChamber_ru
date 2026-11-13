@@ -80,5 +80,6 @@ export const providersI18n = {
     'settings.providers.methods.status.notConnected': 'Не подключено',
     'settings.providers.card.status.noModels': 'No models',
     'settings.providers.page.models.none': 'OpenCode lists no models for this provider.',
+    'settings.openchamber.defaults.field.modelUnavailable': 'This model isn\'t available anymore, so new sessions use another model.',
   },
 } as const;

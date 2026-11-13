@@ -30,5 +30,8 @@ export const tooltipsChatI18n = {
     'contextTooltips.chat.openImage': 'Open image',
     'contextTooltips.chat.dispatchedOpen': 'Open this session',
     'contextTooltips.chat.messageTime': 'Message time: {time}',
+    'contextTooltips.chat.prWatchStopAll': 'Stop waking the agent on any of them',
+    'contextTooltips.chat.prWatchesShow': 'Show what the agent waits on',
+    'contextTooltips.chat.prWatchesHide': 'Hide what the agent waits on',
   },
 };
